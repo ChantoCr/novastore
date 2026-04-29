@@ -1,4 +1,5 @@
 import { errorResponse } from '../utils/apiResponse.js';
+import { AppError } from '../utils/appError.js';
 
 export function notFoundHandler(_req, res) {
   res.status(404).json(
@@ -8,10 +9,20 @@ export function notFoundHandler(_req, res) {
   );
 }
 
-export function errorHandler(error, _req, res, _next) {
+export function errorHandler(error, _req, res, next) {
+  void next;
+  if (error instanceof AppError) {
+    return res.status(error.statusCode).json(
+      errorResponse({
+        message: error.message,
+        errors: error.errors,
+      }),
+    );
+  }
+
   console.error(error);
 
-  res.status(500).json(
+  return res.status(500).json(
     errorResponse({
       message: 'Internal server error',
       errors:

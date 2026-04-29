@@ -12,6 +12,11 @@ const envSchema = z.object({
   DB_NAME: z.string().default('nova_store'),
   DB_USER: z.string().default('root'),
   DB_PASSWORD: z.string().default('root'),
+  JWT_ACCESS_SECRET: z.string().min(16).default('change-me-access-secret'),
+  JWT_REFRESH_SECRET: z.string().min(16).default('change-me-refresh-secret'),
+  ACCESS_TOKEN_TTL: z.string().default('15m'),
+  REFRESH_TOKEN_TTL: z.string().default('7d'),
+  BCRYPT_SALT_ROUNDS: z.coerce.number().int().min(10).max(14).default(12),
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -6,6 +6,7 @@ import rateLimit from 'express-rate-limit';
 
 import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js';
+import authRouter from './routes/auth.routes.js';
 import apiRouter from './routes/index.js';
 
 const app = express();
@@ -28,7 +29,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/auth', authLimiter);
+app.use('/api/auth', authLimiter, authRouter);
 app.use('/api', apiRouter);
 
 app.get('/', (_req, res) => {
