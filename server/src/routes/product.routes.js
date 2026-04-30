@@ -4,6 +4,7 @@ import {
   createProduct,
   deleteProduct,
   getProduct,
+  listManagedProducts,
   listProducts,
   updateProduct,
 } from '../controllers/product.controller.js';
@@ -13,6 +14,7 @@ import { validateRequest } from '../middlewares/validateRequest.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
   createProductSchema,
+  listManagedProductsQuerySchema,
   listProductsQuerySchema,
   productIdentifierSchema,
   updateProductSchema,
@@ -21,6 +23,13 @@ import {
 const productRouter = Router();
 
 productRouter.get('/', validateRequest({ query: listProductsQuerySchema }), asyncHandler(listProducts));
+productRouter.get(
+  '/manage',
+  authenticateToken,
+  authorizeRoles('admin'),
+  validateRequest({ query: listManagedProductsQuerySchema }),
+  asyncHandler(listManagedProducts),
+);
 productRouter.get(
   '/:productIdOrSlug',
   validateRequest({ params: productIdentifierSchema }),

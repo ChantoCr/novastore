@@ -10,5 +10,5 @@
 2. `seeds/001_demo_seed.sql`
 
 ## Important Note
-The seed file includes placeholder password hashes for demo users.
-Replace them with valid bcrypt hashes before testing real authentication flows.
+The current demo seed already includes valid bcrypt password hashes for the documented demo accounts.
+If you rotate those passwords later, regenerate hashes before testing real authentication flows.

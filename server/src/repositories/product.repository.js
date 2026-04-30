@@ -21,9 +21,17 @@ function mapProductRow(row) {
   };
 }
 
-function buildPublicFilters({ search, category }) {
-  const whereClauses = ['p.deleted_at IS NULL', 'p.is_active = 1'];
+function buildCatalogFilters({ search, category, includeInactive = false, status = 'all' }) {
+  const whereClauses = ['p.deleted_at IS NULL'];
   const params = [];
+
+  if (!includeInactive) {
+    whereClauses.push('p.is_active = 1');
+  } else if (status === 'active') {
+    whereClauses.push('p.is_active = 1');
+  } else if (status === 'inactive') {
+    whereClauses.push('p.is_active = 0');
+  }
 
   if (search) {
     whereClauses.push('(p.name LIKE ? OR p.description LIKE ?)');
@@ -78,7 +86,7 @@ const productSelect = `
 `;
 
 export async function listPublicProducts({ page, limit, search, category, sort }) {
-  const { whereSql, params } = buildPublicFilters({ search, category });
+  const { whereSql, params } = buildCatalogFilters({ search, category });
   const offset = (page - 1) * limit;
   const orderClause = getOrderClause(sort);
 
@@ -94,7 +102,49 @@ export async function listPublicProducts({ page, limit, search, category, sort }
 }
 
 export async function countPublicProducts({ search, category }) {
-  const { whereSql, params } = buildPublicFilters({ search, category });
+  const { whereSql, params } = buildCatalogFilters({ search, category });
+
+  const [rows] = await dbPool.query(
+    `
+      SELECT COUNT(*) AS total
+      FROM products p
+      LEFT JOIN categories c ON c.id = p.category_id
+      ${whereSql}
+    `,
+    params,
+  );
+
+  return Number(rows[0]?.total || 0);
+}
+
+export async function listManagedProducts({ page, limit, search, category, sort, status }) {
+  const { whereSql, params } = buildCatalogFilters({
+    search,
+    category,
+    includeInactive: true,
+    status,
+  });
+  const offset = (page - 1) * limit;
+  const orderClause = getOrderClause(sort);
+
+  const [rows] = await dbPool.query(
+    `${productSelect}
+     ${whereSql}
+     ORDER BY ${orderClause}
+     LIMIT ? OFFSET ?`,
+    [...params, limit, offset],
+  );
+
+  return rows.map(mapProductRow);
+}
+
+export async function countManagedProducts({ search, category, status }) {
+  const { whereSql, params } = buildCatalogFilters({
+    search,
+    category,
+    includeInactive: true,
+    status,
+  });
 
   const [rows] = await dbPool.query(
     `

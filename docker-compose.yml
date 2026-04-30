@@ -23,6 +23,7 @@ services:
       dockerfile: Dockerfile.server
     container_name: nova-store-server
     restart: unless-stopped
+    command: sh -c "npm install && npm run dev"
     env_file:
       - .env
     ports:
@@ -40,6 +41,7 @@ services:
       dockerfile: Dockerfile.client
     container_name: nova-store-client
     restart: unless-stopped
+    command: sh -c "npm install && npm run dev"
     env_file:
       - .env
     environment:

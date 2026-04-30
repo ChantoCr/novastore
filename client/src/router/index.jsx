@@ -1,6 +1,11 @@
 import { createBrowserRouter } from 'react-router-dom';
 
+import ProtectedRoute from '../components/layout/ProtectedRoute.jsx';
+import RoleProtectedRoute from '../components/layout/RoleProtectedRoute.jsx';
+import AdminLayout from '../layouts/AdminLayout.jsx';
 import PublicLayout from '../layouts/PublicLayout.jsx';
+import AccountPage from '../pages/AccountPage.jsx';
+import AdminProductsPage from '../pages/AdminProductsPage.jsx';
 import HomePage from '../pages/HomePage.jsx';
 import LoginPage from '../pages/LoginPage.jsx';
 import ProductDetailPage from '../pages/ProductDetailPage.jsx';
@@ -31,6 +36,28 @@ export const router = createBrowserRouter([
       {
         path: 'products/:productIdOrSlug',
         element: <ProductDetailPage />,
+      },
+      {
+        path: 'account',
+        element: (
+          <ProtectedRoute>
+            <AccountPage />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
+  {
+    path: '/admin',
+    element: (
+      <RoleProtectedRoute allowedRoles={['admin']}>
+        <AdminLayout />
+      </RoleProtectedRoute>
+    ),
+    children: [
+      {
+        path: 'products',
+        element: <AdminProductsPage />,
       },
     ],
   },

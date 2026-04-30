@@ -1,7 +1,9 @@
 import {
+  countManagedProducts,
   countPublicProducts,
   createProduct,
   findProductByIdentifier,
+  listManagedProducts,
   listPublicProducts,
   softDeleteProductByIdentifier,
   updateProductByIdentifier,
@@ -38,6 +40,43 @@ export async function getPublicProducts(query) {
       search: query.search || null,
       category: query.category || null,
       sort: query.sort || 'newest',
+    },
+  };
+}
+
+export async function getManagedProducts(query) {
+  const page = query.page || 1;
+  const limit = query.limit || 12;
+
+  const [items, totalItems] = await Promise.all([
+    listManagedProducts({
+      page,
+      limit,
+      search: query.search,
+      category: query.category,
+      sort: query.sort,
+      status: query.status,
+    }),
+    countManagedProducts({
+      search: query.search,
+      category: query.category,
+      status: query.status,
+    }),
+  ]);
+
+  return {
+    items,
+    pagination: {
+      page,
+      limit,
+      totalItems,
+      totalPages: Math.max(1, Math.ceil(totalItems / limit)),
+    },
+    filters: {
+      search: query.search || null,
+      category: query.category || null,
+      sort: query.sort || 'newest',
+      status: query.status || 'all',
     },
   };
 }

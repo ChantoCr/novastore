@@ -2,6 +2,7 @@ import { successResponse } from '../utils/apiResponse.js';
 import {
   createProductRecord,
   deactivateProductRecord,
+  getManagedProducts,
   getPublicProduct,
   getPublicProducts,
   updateProductRecord,
@@ -13,6 +14,17 @@ export async function listProducts(req, res) {
   res.status(200).json(
     successResponse({
       message: 'Products loaded successfully',
+      data,
+    }),
+  );
+}
+
+export async function listManagedProducts(req, res) {
+  const data = await getManagedProducts(req.query);
+
+  res.status(200).json(
+    successResponse({
+      message: 'Managed products loaded successfully',
       data,
     }),
   );

@@ -16,6 +16,10 @@ export const listProductsQuerySchema = z.object({
     .default('newest'),
 });
 
+export const listManagedProductsQuerySchema = listProductsQuerySchema.extend({
+  status: z.enum(['all', 'active', 'inactive']).default('all'),
+});
+
 export const createProductSchema = z.object({
   categoryId: z.coerce.number().int().positive().nullable().default(null),
   name: z.string().trim().min(2).max(180),

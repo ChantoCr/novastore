@@ -37,7 +37,8 @@ Before implementing new features, check whether the current need is:
 - database import/setup support
 
 ## Important Context
-- This repository already contains auth and products scaffolding.
+- This repository already contains auth, products, categories, and an admin product management UI.
 - Demo credentials are documented in `README.md` and `CHAT_CONTEXT_HANDOFF.md`.
-- Docker was not available in the user's PowerShell session during the last chat.
+- Docker is working now and should be treated as the default local run path unless the user asks for manual MySQL help.
+- If a Docker-only dependency import error appears, check stale named `node_modules` volumes first, then restart containers or use `docker compose down -v`.
 - For manual local MySQL runs, verify whether `.env` uses `DB_HOST=localhost`.

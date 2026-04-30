@@ -1,6 +1,6 @@
 -- NOTE:
--- The password hashes below are placeholders.
--- Replace them with real bcrypt hashes before testing full authentication flows.
+-- The password hashes below are valid bcrypt hashes for the documented demo accounts.
+-- If you rotate demo passwords later, regenerate and replace the hashes before testing auth flows.
 
 INSERT INTO roles (name, description)
 VALUES

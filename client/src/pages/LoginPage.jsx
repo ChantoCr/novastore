@@ -1,15 +1,17 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-import AuthSection from '../features/auth/components/AuthSection.jsx';
 import { useLoginMutation } from '../features/auth/api/authApi.js';
+import LoginForm from '../features/auth/components/LoginForm.jsx';
+import AuthSection from '../features/auth/components/AuthSection.jsx';
 
 function LoginPage() {
-  const [formState, setFormState] = useState({
-    email: 'admin@novastore.dev',
-    password: 'NovaStore123!',
-  });
-  const [login, { isLoading, isSuccess, error }] = useLoginMutation();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const role = useSelector((state) => state.auth.role);
+  const [login, { isLoading, error }] = useLoginMutation();
 
   const errorMessage = useMemo(() => {
     if (!error) {
@@ -19,48 +21,32 @@ function LoginPage() {
     return error?.data?.message || 'Login failed. Check your credentials and API setup.';
   }, [error]);
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-    await login(formState);
+  if (isAuthenticated) {
+    return <Navigate to={role === 'admin' ? '/admin/products' : '/account'} replace />;
+  }
+
+  async function handleSubmit(values) {
+    const response = await login(values).unwrap();
+    const fallbackPath = response.data.user.roles?.includes('admin') ? '/admin/products' : '/account';
+    const nextPath = location.state?.from?.pathname || fallbackPath;
+
+    navigate(nextPath, { replace: true });
   }
 
   return (
     <AuthSection
       eyebrow="Authentication"
       title="Sign in to NOVA Store"
-      description="This page is connected to the auth module scaffold. Real login works once the seed password hashes are replaced with valid bcrypt hashes."
+      description="Use the seeded demo accounts to verify role-aware access. Admins are redirected to product management, while shoppers land on their account page."
     >
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <label className="block text-sm text-slate-200">
-          Email
-          <input
-            type="email"
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none ring-0"
-            value={formState.email}
-            onChange={(event) => setFormState((current) => ({ ...current, email: event.target.value }))}
-          />
-        </label>
-
-        <label className="block text-sm text-slate-200">
-          Password
-          <input
-            type="password"
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none ring-0"
-            value={formState.password}
-            onChange={(event) =>
-              setFormState((current) => ({ ...current, password: event.target.value }))
-            }
-          />
-        </label>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full rounded-2xl bg-violet-500 px-4 py-3 font-medium text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          {isLoading ? 'Signing in...' : 'Sign in'}
-        </button>
-      </form>
+      <LoginForm
+        defaultValues={{
+          email: 'admin@novastore.dev',
+          password: 'NovaStore123!',
+        }}
+        isSubmitting={isLoading}
+        onSubmit={handleSubmit}
+      />
 
       {errorMessage ? (
         <p className="mt-4 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
@@ -68,11 +54,11 @@ function LoginPage() {
         </p>
       ) : null}
 
-      {isSuccess ? (
-        <p className="mt-4 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-          Login request succeeded. You can now access protected flows once they are added.
-        </p>
-      ) : null}
+      <div className="mt-4 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+        <p className="font-medium">Demo credentials</p>
+        <p className="mt-1">Admin: admin@novastore.dev · NovaStore123!</p>
+        <p className="mt-1">User: user@novastore.dev · NovaStore123!</p>
+      </div>
 
       <p className="mt-6 text-sm text-slate-300">
         Need an account?{' '}

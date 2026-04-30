@@ -12,6 +12,10 @@ This repository currently includes:
 - Base frontend and backend scaffolding
 - Auth module structure on frontend and backend
 - Products module skeleton on frontend and backend
+- Categories read module on frontend and backend
+- Admin product management UI for role-protected catalog editing
+- React Hook Form + Zod auth forms
+- Frontend tests for auth form validation and product card rendering
 - Starter Docker setup
 - Starter MySQL schema, migration, and seed files
 - ESLint and Prettier configuration
@@ -50,8 +54,6 @@ Implementation of full business features will follow the development phases defi
 - Redux Toolkit
 - RTK Query
 - Tailwind CSS
-- shadcn/ui
-- Framer Motion
 - React Hook Form
 - Zod
 
@@ -77,9 +79,8 @@ Implementation of full business features will follow the development phases defi
 - Docker Compose
 - ESLint
 - Prettier
-- Vitest or Jest
-- Supertest
-- React Testing Library
+- Vitest
+- Testing Library
 
 ## Project Structure
 
@@ -108,13 +109,14 @@ nova-store/
 │       │   ├── shared/
 │       │   └── layout/
 │       ├── features/
+│       │   ├── admin/
 │       │   ├── auth/
+│       │   ├── categories/
 │       │   ├── products/
 │       │   ├── cart/
 │       │   ├── orders/
 │       │   ├── wishlist/
-│       │   ├── reviews/
-│       │   └── admin/
+│       │   └── reviews/
 │       ├── hooks/
 │       ├── layouts/
 │       ├── pages/
@@ -161,7 +163,7 @@ nova-store/
 
 ### Frontend
 - Feature-based structure
-- Shared layouts for public, user, auth, and admin flows
+- Shared layouts for public, authenticated, and admin flows
 - Redux Toolkit for global client state
 - RTK Query for server communication
 - Reusable UI components and premium dashboard styling
@@ -183,10 +185,10 @@ nova-store/
 ## Security Decisions
 - Passwords must be hashed, never stored in plain text
 - Access control must be enforced on the backend
-- Rate limiting will protect auth-sensitive endpoints
-- Helmet and CORS must be configured intentionally
+- Rate limiting protects auth-sensitive endpoints
+- Helmet and CORS are configured intentionally
 - Checkout totals and stock validation must be calculated on the backend
-- Refresh tokens should be stored and invalidated safely
+- Refresh tokens are hashed in the database and rotated on refresh
 
 ## Local Development
 
@@ -252,29 +254,49 @@ Start the stack:
 docker compose up --build
 ```
 
+The Compose setup now runs `npm install` when the client and server containers start, which helps keep bind-mounted `node_modules` volumes in sync after dependency changes.
+
+If you ever see a Docker-only import error after adding packages, run:
+
+```bash
+docker compose restart client server
+```
+
+If the named `node_modules` volumes are still stale, reset them completely:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
 Expected services:
 - Client: `http://localhost:5173`
 - Server: `http://localhost:5000`
 - API health route: `http://localhost:5000/api/health`
+- Categories route: `http://localhost:5000/api/categories`
 - Products route: `http://localhost:5000/api/products`
+- Admin products route: `http://localhost:5000/api/products/manage`
 - MySQL: `localhost:3306`
 
 ## Current Scaffolded Modules
 
 ### Backend
 - Auth routes: register, login, refresh, logout, me
-- Product routes: list, detail, create, update, soft delete
+- Categories route: list active categories
+- Product routes: public list, detail, admin managed list, create, update, soft delete
 - Validation middleware
 - JWT auth middleware
 - Role authorization middleware
 - Centralized error handling
 
 ### Frontend
-- Auth pages: login and register
-- Product listing page
+- Auth pages: login and register with React Hook Form + Zod
+- Authenticated account page
+- Product listing page with live category filters
 - Product detail page
+- Admin product management page
 - RTK Query base API
-- Auth slice and products API slice
+- Auth slice, categories API slice, and products API slice
 - Protected route and role-protected route components
 
 ## Environment Variables
@@ -307,21 +329,26 @@ npm run format
 npm run format:check
 ```
 
+Run frontend tests:
+
+```bash
+npm run test:run -w client
+```
+
 ## Demo Data Notes
 The seed file includes starter roles, categories, products, coupons, and demo users.
 
-Important:
-- Demo user password hashes are already seeded for local development.
-- Current demo password for both accounts: `NovaStore123!`
-- If you want to rotate passwords later, you can generate a new bcrypt hash with:
-
-```bash
-npm run hash:password -w server -- YourNewPassword123!
-```
+Current demo password for both accounts: `NovaStore123!`
 
 Suggested demo accounts:
 - Admin: `admin@novastore.dev`
 - User: `user@novastore.dev`
+
+If you want to rotate passwords later, you can generate a new bcrypt hash with:
+
+```bash
+npm run hash:password -w server -- YourNewPassword123!
+```
 
 ## API Domains Planned
 - `/api/auth`
@@ -356,15 +383,18 @@ High-level phases:
 12. Docker and final portfolio polish
 
 ## Testing Strategy
-Planned test coverage includes:
-- Auth flows
-- Protected routes
-- Role authorization
-- Product endpoints
-- Checkout calculations
-- Coupon validation
-- Order creation
-- Frontend route protection and cart behavior
+Current coverage includes:
+- login form validation
+- login form submit behavior
+- product card rendering
+
+Planned next coverage includes:
+- backend auth flows
+- protected routes and role authorization
+- product endpoints
+- checkout calculations
+- coupon validation
+- order creation
 
 ## What Makes NOVA Store Different
 This project is intentionally structured to go beyond a beginner e-commerce demo by focusing on:
@@ -380,9 +410,8 @@ Add screenshots here as implementation progresses:
 - Home page
 - Product listing
 - Product detail
-- Cart and checkout
-- User dashboard
-- Admin dashboard
+- Account page
+- Admin products page
 
 ## Roadmap / Future Improvements
 - Real payment provider integration later

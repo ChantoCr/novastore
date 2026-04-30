@@ -1,16 +1,16 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 import { useRegisterMutation } from '../features/auth/api/authApi.js';
+import RegisterForm from '../features/auth/components/RegisterForm.jsx';
 import AuthSection from '../features/auth/components/AuthSection.jsx';
 
 function RegisterPage() {
-  const [formState, setFormState] = useState({
-    name: 'Demo Shopper',
-    email: 'shopper@novastore.dev',
-    password: 'NovaStore123!',
-  });
-  const [register, { isLoading, isSuccess, error }] = useRegisterMutation();
+  const navigate = useNavigate();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const role = useSelector((state) => state.auth.role);
+  const [register, { isLoading, error }] = useRegisterMutation();
 
   const errorMessage = useMemo(() => {
     if (!error) {
@@ -20,68 +20,34 @@ function RegisterPage() {
     return error?.data?.message || 'Registration failed. Check backend setup and demo data.';
   }, [error]);
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-    await register(formState);
+  if (isAuthenticated) {
+    return <Navigate to={role === 'admin' ? '/admin/products' : '/account'} replace />;
+  }
+
+  async function handleSubmit(values) {
+    await register(values).unwrap();
+    navigate('/account', { replace: true });
   }
 
   return (
     <AuthSection
       eyebrow="Authentication"
       title="Create your NOVA account"
-      description="This scaffold uses the backend register endpoint. In production-ready phases, validation UX and refresh-token strategy will be hardened further."
+      description="New registrations are provisioned with the shopper role and redirected into the authenticated account area after success."
     >
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <label className="block text-sm text-slate-200">
-          Name
-          <input
-            type="text"
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none ring-0"
-            value={formState.name}
-            onChange={(event) => setFormState((current) => ({ ...current, name: event.target.value }))}
-          />
-        </label>
-
-        <label className="block text-sm text-slate-200">
-          Email
-          <input
-            type="email"
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none ring-0"
-            value={formState.email}
-            onChange={(event) => setFormState((current) => ({ ...current, email: event.target.value }))}
-          />
-        </label>
-
-        <label className="block text-sm text-slate-200">
-          Password
-          <input
-            type="password"
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none ring-0"
-            value={formState.password}
-            onChange={(event) =>
-              setFormState((current) => ({ ...current, password: event.target.value }))
-            }
-          />
-        </label>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full rounded-2xl bg-violet-500 px-4 py-3 font-medium text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          {isLoading ? 'Creating account...' : 'Create account'}
-        </button>
-      </form>
+      <RegisterForm
+        defaultValues={{
+          name: 'Demo Shopper',
+          email: 'shopper@novastore.dev',
+          password: 'NovaStore123!',
+        }}
+        isSubmitting={isLoading}
+        onSubmit={handleSubmit}
+      />
 
       {errorMessage ? (
         <p className="mt-4 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
           {errorMessage}
-        </p>
-      ) : null}
-
-      {isSuccess ? (
-        <p className="mt-4 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-          Registration request succeeded.
         </p>
       ) : null}
 

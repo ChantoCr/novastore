@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react';
 
-import ProductGrid from '../features/products/components/ProductGrid.jsx';
+import { useGetCategoriesQuery } from '../features/categories/api/categoriesApi.js';
 import { useGetProductsQuery } from '../features/products/api/productsApi.js';
+import ProductGrid from '../features/products/components/ProductGrid.jsx';
 
 const defaultFilters = {
   page: 1,
   limit: 6,
   search: '',
+  category: '',
   sort: 'newest',
 };
 
@@ -16,27 +18,30 @@ function ProductsPage() {
     () => ({
       ...filters,
       search: filters.search || undefined,
+      category: filters.category || undefined,
     }),
     [filters],
   );
   const { data, isLoading, isError, error } = useGetProductsQuery(queryParams);
+  const { data: categoriesResponse } = useGetCategoriesQuery();
 
   const products = data?.data?.items || [];
   const pagination = data?.data?.pagination;
+  const categories = categoriesResponse?.data || [];
 
   return (
     <section className="space-y-8">
       <div className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.35em] text-violet-300">Catalog</p>
-          <h2 className="mt-3 text-3xl font-semibold text-white">Product module skeleton</h2>
+          <h2 className="mt-3 text-3xl font-semibold text-white">Products and categories</h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-            This page uses RTK Query against the backend products module. Search, sorting, detail pages,
-            and admin write operations are scaffolded.
+            This view now uses the live categories module for filtering while keeping RTK Query-based
+            search, sorting, and pagination for the product catalog.
           </p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <label className="text-sm text-slate-200">
             Search
             <input
@@ -48,6 +53,24 @@ function ProductsPage() {
               className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white"
               placeholder="Search products"
             />
+          </label>
+
+          <label className="text-sm text-slate-200">
+            Category
+            <select
+              value={filters.category}
+              onChange={(event) =>
+                setFilters((current) => ({ ...current, page: 1, category: event.target.value }))
+              }
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white"
+            >
+              <option value="">All categories</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.slug}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label className="text-sm text-slate-200">

@@ -15,6 +15,19 @@ export const productsApi = baseApi.injectEndpoints({
             ]
           : [{ type: 'Products', id: 'LIST' }],
     }),
+    getManagedProducts: builder.query({
+      query: (params = {}) => ({
+        url: '/products/manage',
+        params,
+      }),
+      providesTags: (result) =>
+        result?.data?.items
+          ? [
+              ...result.data.items.map((product) => ({ type: 'ManagedProducts', id: product.id })),
+              { type: 'ManagedProducts', id: 'LIST' },
+            ]
+          : [{ type: 'ManagedProducts', id: 'LIST' }],
+    }),
     getProductByIdentifier: builder.query({
       query: (identifier) => `/products/${identifier}`,
       providesTags: (_result, _error, identifier) => [{ type: 'Products', id: identifier }],
@@ -25,7 +38,10 @@ export const productsApi = baseApi.injectEndpoints({
         method: 'POST',
         body: payload,
       }),
-      invalidatesTags: [{ type: 'Products', id: 'LIST' }],
+      invalidatesTags: [
+        { type: 'Products', id: 'LIST' },
+        { type: 'ManagedProducts', id: 'LIST' },
+      ],
     }),
     updateProduct: builder.mutation({
       query: ({ identifier, ...payload }) => ({
@@ -36,6 +52,8 @@ export const productsApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, { identifier }) => [
         { type: 'Products', id: identifier },
         { type: 'Products', id: 'LIST' },
+        { type: 'ManagedProducts', id: identifier },
+        { type: 'ManagedProducts', id: 'LIST' },
       ],
     }),
     deleteProduct: builder.mutation({
@@ -43,7 +61,10 @@ export const productsApi = baseApi.injectEndpoints({
         url: `/products/${identifier}`,
         method: 'DELETE',
       }),
-      invalidatesTags: [{ type: 'Products', id: 'LIST' }],
+      invalidatesTags: [
+        { type: 'Products', id: 'LIST' },
+        { type: 'ManagedProducts', id: 'LIST' },
+      ],
     }),
   }),
 });
@@ -51,6 +72,7 @@ export const productsApi = baseApi.injectEndpoints({
 export const {
   useCreateProductMutation,
   useDeleteProductMutation,
+  useGetManagedProductsQuery,
   useGetProductByIdentifierQuery,
   useGetProductsQuery,
   useUpdateProductMutation,

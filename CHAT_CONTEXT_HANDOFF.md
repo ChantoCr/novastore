@@ -1,7 +1,7 @@
 # Chat Context Handoff — NOVA Store
 
 ## Purpose
-This file summarizes the work completed in the current chat so a new chat can continue without losing context.
+This file summarizes the important project history and the latest completed work so a new chat can continue without losing context.
 
 ---
 
@@ -10,21 +10,23 @@ NOVA Store is a fullstack e-commerce portfolio project with:
 - React + Vite frontend
 - Node + Express backend
 - MySQL database
-- Auth and role-based access
+- JWT auth with refresh tokens
+- Role-based access control
 - Admin and e-commerce architecture
 - Docker support
 - Professional project documentation
 
-The architecture rules and project expectations are defined in:
+The main architecture and working rules are defined in:
 - `README.md`
 - `AGENTS.md`
 - `skills/`
 
 ---
 
-## What Was Created In This Chat
+## Historical Foundation Already In The Repo
+These were already created in earlier work and remain part of the current project state.
 
-### 1) AI project guidance and skill architecture
+### 1) AI project guidance and architecture docs
 Created:
 - `AGENTS.md`
 - `skills/frontend/SKILL.md`
@@ -134,14 +136,10 @@ Frontend:
 
 ### 9) Code quality tooling
 Created:
-- `package.json` at repository root with npm workspaces
+- root `package.json` with npm workspaces
 - `eslint.config.js`
 - `.prettierrc.json`
 - `.prettierignore`
-
-Updated scripts in:
-- `client/package.json`
-- `server/package.json`
 
 ### 10) Password hash helper
 Created:
@@ -149,38 +147,167 @@ Created:
 
 ---
 
-## Important Updates Made
+## Latest Chat — What Was Added / Updated
+This is the most recent implementation work and should be treated as the current working baseline.
 
-### Seed users now have real bcrypt hashes
-The placeholder password hashes were replaced in:
+### 1) Role-aware authentication UX is now working
+Implemented:
+- login redirect based on backend role
+- admin users go to `/admin/products`
+- normal users go to `/account`
+- authenticated header state in the public layout
+- logout button in the header
+- role-aware protected route behavior
+
+Updated files:
+- `client/src/pages/LoginPage.jsx`
+- `client/src/pages/RegisterPage.jsx`
+- `client/src/layouts/PublicLayout.jsx`
+- `client/src/components/layout/RoleProtectedRoute.jsx`
+- `client/src/router/index.jsx`
+
+### 2) Auth forms now use React Hook Form + Zod
+Added reusable validated forms:
+- `client/src/features/auth/components/LoginForm.jsx`
+- `client/src/features/auth/components/RegisterForm.jsx`
+- `client/src/features/auth/validation/authFormSchemas.js`
+
+Notes:
+- validation messages now render in the UI
+- form state is no longer managed manually in page components
+
+### 3) Categories module was implemented
+Backend:
+- `server/src/routes/category.routes.js`
+- `server/src/controllers/category.controller.js`
+- `server/src/services/category.service.js`
+- `server/src/repositories/category.repository.js`
+
+Frontend:
+- `client/src/features/categories/api/categoriesApi.js`
+- `client/src/pages/ProductsPage.jsx`
+
+Behavior:
+- public catalog now loads real categories from `/api/categories`
+- category filter uses seeded category data
+
+### 4) Admin product management UI was added
+New files:
+- `client/src/layouts/AdminLayout.jsx`
+- `client/src/pages/AdminProductsPage.jsx`
+- `client/src/features/admin/components/AdminProductForm.jsx`
+- `client/src/features/admin/components/AdminProductsTable.jsx`
+- `client/src/features/admin/validation/productFormSchema.js`
+
+Behavior:
+- admin-only route at `/admin/products`
+- admin product list supports search, category filter, status filter, sort, and pagination
+- admin can create products
+- admin can update products
+- admin can toggle active/inactive status
+- public and admin product lists use separate RTK Query tags
+
+### 5) Backend support for managed product listing was added
+Updated files:
+- `server/src/controllers/product.controller.js`
+- `server/src/services/product.service.js`
+- `server/src/repositories/product.repository.js`
+- `server/src/routes/product.routes.js`
+- `server/src/validators/product.validators.js`
+- `server/src/routes/index.js`
+
+New backend behavior:
+- `GET /api/products/manage` for admin-only managed catalog access
+- status filtering for `all`, `active`, and `inactive`
+- public product list still only returns active, non-deleted products
+
+### 6) Auth and product frontend tests were added
+Created:
+- `client/src/features/auth/components/LoginForm.test.jsx`
+- `client/src/features/products/components/ProductCard.test.jsx`
+- `client/src/test/setup.js`
+- `client/src/test/test-utils.jsx`
+
+Updated:
+- `client/package.json`
+- `client/vite.config.js`
+
+Current frontend test coverage includes:
+- login form validation
+- login form submit behavior
+- product card rendering
+
+### 7) Account page was added
+Created:
+- `client/src/pages/AccountPage.jsx`
+
+Behavior:
+- shows authenticated user data from Redux auth state
+- confirms the current role and access level
+
+### 8) Docker issue was diagnosed and fixed
+Problem encountered:
+- Vite inside Docker could not resolve `@hookform/resolvers/zod`
+- root cause was stale named Docker volumes for `node_modules`
+- the container had updated source code but outdated installed dependencies
+
+Fix applied:
+- updated `docker-compose.yml`
+- client and server now run `npm install && npm run dev` on startup
+
+Effect:
+- bind-mounted development containers are less likely to break after adding dependencies
+
+Important Docker recovery commands:
+```bash
+docker compose restart client server
+```
+
+If named volumes are stale:
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+### 9) Documentation was updated
+Updated:
+- `README.md`
+- `database/README.md`
 - `database/init/02-seed.sql`
 - `database/seeds/001_demo_seed.sql`
 
-### Current demo credentials
+Notes:
+- outdated placeholder-password wording was corrected
+- Docker guidance was updated to reflect the new dependency-sync behavior
+
+---
+
+## Current Demo Credentials
+These are valid and documented.
+
 - Admin: `admin@novastore.dev`
 - User: `user@novastore.dev`
 - Password for both: `NovaStore123!`
-
-### README was updated
-The README now includes:
-- current scaffolded modules
-- migration/seed notes
-- code quality commands
-- demo credentials
-- run instructions and context
 
 ---
 
 ## Current Working Application State
 
-### Frontend routes scaffolded
+### Frontend routes
+Public:
 - `/`
 - `/login`
 - `/register`
 - `/products`
 - `/products/:productIdOrSlug`
 
-### Backend routes scaffolded
+Authenticated:
+- `/account`
+
+Admin:
+- `/admin/products`
+
+### Backend routes
 Health:
 - `GET /api/health`
 - `GET /api/health/db`
@@ -192,144 +319,98 @@ Auth:
 - `POST /api/auth/logout`
 - `GET /api/auth/me`
 
+Categories:
+- `GET /api/categories`
+
 Products:
 - `GET /api/products`
+- `GET /api/products/manage` admin-only
 - `GET /api/products/:productIdOrSlug`
-- `POST /api/products` admin-only scaffold
-- `PATCH /api/products/:productIdOrSlug` admin-only scaffold
-- `DELETE /api/products/:productIdOrSlug` admin-only scaffold
+- `POST /api/products` admin-only
+- `PATCH /api/products/:productIdOrSlug` admin-only
+- `DELETE /api/products/:productIdOrSlug` admin-only scaffold / soft-delete path
 
 ---
 
-## Validation Completed In This Chat
-- `npm install` completed successfully
-- server-side JS files passed syntax checks
-- `npm run lint` passes
-- `npm run build -w client` passes
-- backend health endpoint was started and successfully tested
+## Validation Completed Successfully
+Completed and passing after the latest work:
+- `npm run lint`
+- `npm run build -w client`
+- `npm run test:run -w client`
+- selected server-side `node --check` syntax validation
 
 ---
 
-## Docker Situation
-The user tried:
+## Important Technical Notes / Constraints
 
-```powershell
-docker compose up --build
-```
+### 1) Docker is now working
+This is different from earlier context.
 
-PowerShell returned:
-- `docker` command not found
+Current state:
+- Docker is available
+- the app is running with Docker
+- use Docker as the primary local dev path unless the user explicitly asks for manual MySQL support
 
-### Meaning
-Docker Desktop is not available in the user's terminal environment yet.
-Possible causes:
-- Docker Desktop is not installed
-- Docker is not on PATH
-- terminal needs restart
-- Docker Desktop is installed but not running
-
----
-
-## How The User Can Run The App Right Now
-
-### Option A — frontend only
-Useful to preview the UI skeleton even without MySQL or Docker:
-
-```powershell
-npm run dev -w client
-```
-
-Open:
-- `http://localhost:5173`
-
-### Option B — manual local fullstack run
-Requires a local MySQL server.
-
-#### 1. Update `.env` for local MySQL
-For local manual execution, `DB_HOST` should be:
-
-```env
-DB_HOST=localhost
-```
-
-If `.env` still contains Docker-style values like `DB_HOST=mysql`, it must be changed for manual local execution.
-
-#### 2. Create database
-Create:
-- `nova_store`
-
-#### 3. Run schema and seed
-Use:
-- `database/migrations/001_initial_schema.sql`
-- `database/seeds/001_demo_seed.sql`
-
-#### 4. Start backend
-```powershell
-npm run dev -w server
-```
-
-#### 5. Start frontend
-In a second terminal:
-
-```powershell
-npm run dev -w client
-```
-
-### Option C — Docker later
-If Docker Desktop gets installed and working, the user can run:
-
-```powershell
-docker compose up --build
-```
-
-If old MySQL Docker volume data causes stale seed data issues:
-
-```powershell
-docker compose down -v
-docker compose up --build
-```
-
----
-
-## Important Environment Notes
-`.env.example` includes both app and DB settings.
-For manual local MySQL runs, the most important field is:
-
-```env
-DB_HOST=localhost
-```
-
-For Docker runs, the DB host can remain:
-
+### 2) `.env` host expectations depend on runtime
+For Docker runs:
 ```env
 DB_HOST=mysql
 ```
 
+For manual local MySQL runs:
+```env
+DB_HOST=localhost
+```
+
+### 3) Auth persistence is still basic
+Important limitation:
+- auth state is still primarily Redux memory state
+- role-aware login and routing work
+- longer-term session persistence/bootstrap strategy can still be improved later
+
+### 4) Admin deactivate vs delete behavior
+Current admin UI uses `PATCH` with `isActive` toggling.
+That was intentional because the `DELETE` endpoint soft-deletes products by setting `deleted_at`, which removes them from normal managed listings.
+
+### 5) Keep architecture aligned with skill files
+Do not break these patterns:
+- backend: routes -> controllers -> services -> repositories
+- frontend: feature-based structure, RTK Query for server data
+- validation in validators / schemas, not ad-hoc inside routes/pages
+
 ---
 
-## Architecture Notes For The Next Chat
-- Follow `AGENTS.md` first.
-- Respect the phase-based architecture.
-- Keep backend layered: routes -> controllers -> services -> repositories.
-- Keep frontend feature-based and use RTK Query for API access.
-- Do not place business logic directly in pages or routes.
-- Preserve security decisions already introduced.
-- Update documentation when architecture changes.
+## Recommended Next Task
+The recommended next implementation is:
+
+### Backend auth/product integration tests with Supertest
+Reason:
+- auth and admin product flows are now important and security-sensitive
+- backend verification will give the strongest quality improvement for the current state of the app
+- this aligns directly with `skills/testing/SKILL.md` and `skills/security/SKILL.md`
+
+Recommended scope:
+1. test setup for server
+2. auth login and `/api/auth/me` tests
+3. admin product authorization tests
+4. product validation tests
 
 ---
 
-## Recommended Next Development Options
-Suggested next tasks after this handoff:
-1. Implement the categories module
-2. Build admin product management UI
-3. Add auth and product tests with Supertest
-4. Convert auth forms to React Hook Form + Zod
+## Suggested Implementation Priorities After That
+After backend integration tests, the next strong options are:
+1. audit logs for admin product actions
+2. improved session bootstrap / persistence strategy
+3. categories admin CRUD
+4. stock and audit-log focused admin improvements
 
 ---
 
 ## Caution For The Next Assistant
-Before coding anything new, confirm:
-- whether the user wants Docker setup help or manual local setup help
-- whether `.env` is configured for local MySQL or Docker
-- whether the database has already been imported
-- whether the user wants implementation work or run/debug support first
+Before coding in the next chat:
+- read files in the exact order defined by `NEXT_CHAT_INSTRUCTIONS.md`
+- execute the task from `NEXT_TASK_PROMPT.md`
+- assume Docker is available unless the user says otherwise
+- if a Docker-only dependency import issue appears, check the named `node_modules` volumes first
+- keep documentation in sync when architecture or setup changes
+- do not introduce quick hacks that bypass the layered backend or RTK Query frontend patterns
