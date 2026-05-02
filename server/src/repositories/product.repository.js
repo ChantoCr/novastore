@@ -159,11 +159,11 @@ export async function countManagedProducts({ search, category, status }) {
   return Number(rows[0]?.total || 0);
 }
 
-export async function findProductByIdentifier(identifier, { includeInactive = false } = {}) {
+export async function findProductByIdentifier(identifier, { includeInactive = false, executor = dbPool } = {}) {
   const isNumericId = /^\d+$/.test(String(identifier));
   const visibilityFilter = includeInactive ? 'p.deleted_at IS NULL' : 'p.deleted_at IS NULL AND p.is_active = 1';
 
-  const [rows] = await dbPool.query(
+  const [rows] = await executor.query(
     `${productSelect}
      WHERE ${visibilityFilter}
        AND ${isNumericId ? 'p.id = ?' : 'p.slug = ?'}
@@ -174,8 +174,8 @@ export async function findProductByIdentifier(identifier, { includeInactive = fa
   return rows[0] ? mapProductRow(rows[0]) : null;
 }
 
-export async function createProduct(product) {
-  const [result] = await dbPool.query(
+export async function createProduct(product, executor = dbPool) {
+  const [result] = await executor.query(
     `
       INSERT INTO products (
         category_id,
@@ -208,7 +208,7 @@ export async function createProduct(product) {
   return result.insertId;
 }
 
-export async function updateProductByIdentifier(identifier, data) {
+export async function updateProductByIdentifier(identifier, data, executor = dbPool) {
   const isNumericId = /^\d+$/.test(String(identifier));
   const updates = [];
   const params = [];
@@ -239,7 +239,7 @@ export async function updateProductByIdentifier(identifier, data) {
 
   params.push(identifier);
 
-  const [result] = await dbPool.query(
+  const [result] = await executor.query(
     `
       UPDATE products
       SET ${updates.join(', ')}
@@ -252,10 +252,54 @@ export async function updateProductByIdentifier(identifier, data) {
   return result.affectedRows;
 }
 
-export async function softDeleteProductByIdentifier(identifier) {
+export async function updateProductStockByIdentifier(identifier, newStock, executor = dbPool) {
   const isNumericId = /^\d+$/.test(String(identifier));
 
-  const [result] = await dbPool.query(
+  const [result] = await executor.query(
+    `
+      UPDATE products
+      SET stock = ?
+      WHERE deleted_at IS NULL
+        AND ${isNumericId ? 'id = ?' : 'slug = ?'}
+    `,
+    [newStock, identifier],
+  );
+
+  return result.affectedRows;
+}
+
+export async function createStockMovementRecord(movement, executor = dbPool) {
+  const [result] = await executor.query(
+    `
+      INSERT INTO stock_movements (
+        product_id,
+        admin_user_id,
+        movement_type,
+        quantity_change,
+        previous_stock,
+        new_stock,
+        reason
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `,
+    [
+      movement.productId,
+      movement.adminUserId,
+      movement.movementType,
+      movement.quantityChange,
+      movement.previousStock,
+      movement.newStock,
+      movement.reason || null,
+    ],
+  );
+
+  return result.insertId;
+}
+
+export async function softDeleteProductByIdentifier(identifier, executor = dbPool) {
+  const isNumericId = /^\d+$/.test(String(identifier));
+
+  const [result] = await executor.query(
     `
       UPDATE products
       SET is_active = 0,

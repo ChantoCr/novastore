@@ -1,6 +1,12 @@
 import { formatCurrency } from '../../../utils/currency.js';
 
-function AdminProductsTable({ onEdit, onToggleStatus, products = [], isToggling = false }) {
+function AdminProductsTable({
+  onAdjustStock,
+  onEdit,
+  onToggleStatus,
+  products = [],
+  isToggling = false,
+}) {
   if (!products.length) {
     return (
       <div className="rounded-3xl border border-dashed border-white/10 bg-white/5 p-8 text-center text-slate-300">
@@ -36,12 +42,15 @@ function AdminProductsTable({ onEdit, onToggleStatus, products = [], isToggling 
                 <td className="px-4 py-4 text-slate-300">{product.categoryName || 'Uncategorized'}</td>
                 <td className="px-4 py-4 text-slate-300">{formatCurrency(product.price)}</td>
                 <td className="px-4 py-4 text-slate-300">
-                  {product.stock}
-                  {product.stock <= product.lowStockThreshold ? (
-                    <span className="ml-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-amber-300">
-                      Low
-                    </span>
-                  ) : null}
+                  <div>
+                    <span>{product.stock}</span>
+                    {product.stock <= product.lowStockThreshold ? (
+                      <span className="ml-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-amber-300">
+                        Low stock
+                      </span>
+                    ) : null}
+                    <p className="mt-1 text-xs text-slate-500">Threshold: {product.lowStockThreshold}</p>
+                  </div>
                 </td>
                 <td className="px-4 py-4">
                   <span
@@ -62,6 +71,13 @@ function AdminProductsTable({ onEdit, onToggleStatus, products = [], isToggling 
                       className="rounded-full border border-white/10 px-3 py-2 text-xs text-slate-200 transition hover:border-violet-400/30 hover:text-white"
                     >
                       Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onAdjustStock(product)}
+                      className="rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-200 transition hover:bg-amber-500/20"
+                    >
+                      Adjust stock
                     </button>
                     <button
                       type="button"

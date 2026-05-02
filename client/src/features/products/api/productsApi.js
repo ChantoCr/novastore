@@ -56,6 +56,19 @@ export const productsApi = baseApi.injectEndpoints({
         { type: 'ManagedProducts', id: 'LIST' },
       ],
     }),
+    adjustProductStock: builder.mutation({
+      query: ({ identifier, ...payload }) => ({
+        url: `/products/${identifier}/stock`,
+        method: 'PATCH',
+        body: payload,
+      }),
+      invalidatesTags: (_result, _error, { identifier }) => [
+        { type: 'Products', id: identifier },
+        { type: 'Products', id: 'LIST' },
+        { type: 'ManagedProducts', id: identifier },
+        { type: 'ManagedProducts', id: 'LIST' },
+      ],
+    }),
     deleteProduct: builder.mutation({
       query: (identifier) => ({
         url: `/products/${identifier}`,
@@ -70,6 +83,7 @@ export const productsApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useAdjustProductStockMutation,
   useCreateProductMutation,
   useDeleteProductMutation,
   useGetManagedProductsQuery,

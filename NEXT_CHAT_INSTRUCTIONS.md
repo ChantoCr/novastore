@@ -37,8 +37,17 @@ Before implementing new features, check whether the current need is:
 - database import/setup support
 
 ## Important Context
-- This repository already contains auth, products, categories, and an admin product management UI.
+- This repository now already contains:
+  - auth and role-aware routing
+  - products and categories
+  - cart and checkout simulation
+  - authenticated order history and order detail
+  - admin product management UI
+  - admin stock adjustment flow
+  - backend audit-log groundwork for admin product actions
 - Demo credentials are documented in `README.md` and `CHAT_CONTEXT_HANDOFF.md`.
 - Docker is working now and should be treated as the default local run path unless the user asks for manual MySQL help.
 - If a Docker-only dependency import error appears, check stale named `node_modules` volumes first, then restart containers or use `docker compose down -v`.
 - For manual local MySQL runs, verify whether `.env` uses `DB_HOST=localhost`.
+- The current next implementation target is auth/session bootstrap persistence, and the latest details are in `CHAT_CONTEXT_HANDOFF.md` and `NEXT_TASK_PROMPT.md`.
+- Do not skip the required `.md` files above; they now contain the latest phase progression and handoff details needed to continue correctly.

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import {
+  adjustProductStock,
   createProduct,
   deleteProduct,
   getProduct,
@@ -13,6 +14,7 @@ import { authorizeRoles } from '../middlewares/authorizeRoles.js';
 import { validateRequest } from '../middlewares/validateRequest.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
+  adjustStockSchema,
   createProductSchema,
   listManagedProductsQuerySchema,
   listProductsQuerySchema,
@@ -42,6 +44,14 @@ productRouter.post(
   authorizeRoles('admin'),
   validateRequest({ body: createProductSchema }),
   asyncHandler(createProduct),
+);
+
+productRouter.patch(
+  '/:productIdOrSlug/stock',
+  authenticateToken,
+  authorizeRoles('admin'),
+  validateRequest({ params: productIdentifierSchema, body: adjustStockSchema }),
+  asyncHandler(adjustProductStock),
 );
 
 productRouter.patch(

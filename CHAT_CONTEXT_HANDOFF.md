@@ -150,6 +150,18 @@ Created:
 ## Latest Chat — What Was Added / Updated
 This is the most recent implementation work and should be treated as the current working baseline.
 
+### Today at a glance
+The work completed today covered four major areas in sequence:
+1. backend auth/product integration test setup and documentation
+2. Phase 4 cart and checkout simulation
+3. Phase 5 order history and account/profile expansion
+4. admin stock-adjustment and audit-log groundwork
+
+If the next assistant needs the shortest high-value summary before implementation, the biggest current takeaway is:
+- the app now has meaningful authenticated user and admin workflows
+- the biggest remaining UX/architecture gap is auth/session bootstrap persistence across refreshes
+- the next prompt has been updated to target that exact gap
+
 ### 1) Role-aware authentication UX is now working
 Implemented:
 - login redirect based on backend role
@@ -365,6 +377,30 @@ Behavior:
 - the account page now acts as a profile and order-history dashboard instead of only showing basic auth state
 - order history includes summary metrics such as total orders, approved orders, pending orders, and approved spend
 
+### 13) Admin stock and audit-log groundwork was implemented
+Created:
+- `server/src/repositories/audit.repository.js`
+- `client/src/features/admin/components/AdminStockAdjustmentForm.jsx`
+- `client/src/features/admin/validation/stockAdjustmentSchema.js`
+
+Updated:
+- `server/src/controllers/product.controller.js`
+- `server/src/services/product.service.js`
+- `server/src/repositories/product.repository.js`
+- `server/src/routes/product.routes.js`
+- `server/src/validators/product.validators.js`
+- `client/src/features/products/api/productsApi.js`
+- `client/src/features/admin/components/AdminProductForm.jsx`
+- `client/src/features/admin/components/AdminProductsTable.jsx`
+- `client/src/pages/AdminProductsPage.jsx`
+- `README.md`
+
+Behavior:
+- admin product actions now create audit log entries on the backend for product creation, product updates, status changes, stock adjustments, and soft deletion
+- admin stock adjustments now use a dedicated protected endpoint instead of relying on generic product edits
+- stock adjustments create stock movement records and reject negative resulting inventory
+- admin product management now surfaces low-stock and zero-stock visibility more clearly in the UI
+
 ---
 
 ## Current Demo Credentials
@@ -421,6 +457,7 @@ Products:
 - `GET /api/products/manage` admin-only
 - `GET /api/products/:productIdOrSlug`
 - `POST /api/products` admin-only
+- `PATCH /api/products/:productIdOrSlug/stock` admin-only stock adjustment
 - `PATCH /api/products/:productIdOrSlug` admin-only
 - `DELETE /api/products/:productIdOrSlug` admin-only scaffold / soft-delete path
 
@@ -477,25 +514,25 @@ Do not break these patterns:
 ## Recommended Next Task
 The recommended next implementation is:
 
-### Stock and audit-log focused admin improvements
+### Improved auth/session bootstrap persistence
 Reason:
-- checkout now creates real sales-side stock movements, while admin product management already exists
-- the biggest architecture gap is making stock changes and important admin product actions more observable and auditable
-- this builds naturally toward the later admin and audit-log phases while strengthening portfolio realism
+- the app now has deeper authenticated value across account, checkout, orders, and admin flows
+- auth is still primarily Redux memory state, which is the biggest UX/architecture limitation called out in the current notes
+- improving session bootstrap would make refreshes and longer-lived demos feel much more production-like
 
 Recommended scope:
-1. admin stock adjustment endpoint and UI controls
-2. audit log creation for product create/update/activation changes
-3. low-stock visibility improvements in admin product management
-4. optional read-only admin audit log listing if the time budget allows
+1. bootstrap authenticated user state on app load when tokens exist
+2. handle expired/invalid auth state more gracefully
+3. keep role-aware routing behavior intact during refreshes
+4. avoid introducing unsafe persistence patterns for sensitive data
 
 ---
 
 ## Suggested Implementation Priorities After That
-After stock and audit-log focused admin improvements, the next strong options are:
-1. improved auth/session bootstrap persistence
-2. categories admin CRUD
-3. checkout-focused backend integration tests for coupon and order flows
+After auth/session bootstrap persistence, the next strong options are:
+1. categories admin CRUD
+2. checkout-focused backend integration tests for coupon and order flows
+3. read-only admin audit log listing
 4. wishlist and reviews groundwork
 
 ---

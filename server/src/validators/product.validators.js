@@ -45,7 +45,15 @@ export const updateProductSchema = z
     stock: z.coerce.number().int().min(0).optional(),
     lowStockThreshold: z.coerce.number().int().min(0).optional(),
     isActive: z.boolean().optional(),
+    stockChangeReason: z.string().trim().max(255).optional(),
   })
-  .refine((value) => Object.keys(value).length > 0, {
+  .refine((value) => Object.keys(value).some((key) => key !== 'stockChangeReason'), {
     message: 'At least one field must be provided for update',
   });
+
+export const adjustStockSchema = z.object({
+  quantityChange: z.coerce.number().int().refine((value) => value !== 0, {
+    message: 'Quantity change must be different from zero',
+  }),
+  reason: z.string().trim().min(3).max(255).optional().or(z.literal('')),
+});

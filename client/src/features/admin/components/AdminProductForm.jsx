@@ -130,16 +130,26 @@ function AdminProductForm({ categories = [], isSubmitting = false, onCancel, onS
           ) : null}
         </label>
 
-        <label className="text-sm text-slate-200">
-          Stock
-          <input
-            type="number"
-            min="0"
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white"
-            {...register('stock')}
-          />
-          {errors.stock ? <span className="mt-2 block text-xs text-rose-300">{errors.stock.message}</span> : null}
-        </label>
+        {isEditing ? (
+          <div className="rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-4 text-sm text-amber-100">
+            <p className="font-medium text-white">Current stock: {product.stock}</p>
+            <p className="mt-2 leading-6">
+              Stock adjustments are handled through the dedicated inventory form below so stock
+              movements and audit logs stay explicit.
+            </p>
+          </div>
+        ) : (
+          <label className="text-sm text-slate-200">
+            Initial stock
+            <input
+              type="number"
+              min="0"
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white"
+              {...register('stock')}
+            />
+            {errors.stock ? <span className="mt-2 block text-xs text-rose-300">{errors.stock.message}</span> : null}
+          </label>
+        )}
 
         <label className="text-sm text-slate-200">
           Low stock threshold

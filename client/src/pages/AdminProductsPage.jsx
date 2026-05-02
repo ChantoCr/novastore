@@ -2,8 +2,10 @@ import { useMemo, useState } from 'react';
 
 import AdminProductForm from '../features/admin/components/AdminProductForm.jsx';
 import AdminProductsTable from '../features/admin/components/AdminProductsTable.jsx';
+import AdminStockAdjustmentForm from '../features/admin/components/AdminStockAdjustmentForm.jsx';
 import { useGetCategoriesQuery } from '../features/categories/api/categoriesApi.js';
 import {
+  useAdjustProductStockMutation,
   useCreateProductMutation,
   useGetManagedProductsQuery,
   useUpdateProductMutation,
@@ -21,6 +23,7 @@ const defaultFilters = {
 function AdminProductsPage() {
   const [filters, setFilters] = useState(defaultFilters);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedStockProduct, setSelectedStockProduct] = useState(null);
   const [feedback, setFeedback] = useState(null);
 
   const queryParams = useMemo(
@@ -36,11 +39,24 @@ function AdminProductsPage() {
   const { data: categoriesResponse } = useGetCategoriesQuery();
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
+  const [adjustProductStock, { isLoading: isAdjustingStock }] = useAdjustProductStockMutation();
 
-  const products = data?.data?.items || [];
+  const products = useMemo(() => data?.data?.items || [], [data]);
   const pagination = data?.data?.pagination;
   const categories = categoriesResponse?.data || [];
   const isSaving = isCreating || isUpdating;
+
+  const inventorySummary = useMemo(() => {
+    const lowStockProducts = products.filter((product) => product.stock <= product.lowStockThreshold);
+    const inactiveProducts = products.filter((product) => !product.isActive);
+
+    return {
+      visibleOnPage: products.length,
+      lowStockCount: lowStockProducts.length,
+      inactiveCount: inactiveProducts.length,
+      zeroStockCount: products.filter((product) => product.stock === 0).length,
+    };
+  }, [products]);
 
   async function handleCreateOrUpdate(values) {
     setFeedback(null);
@@ -48,10 +64,16 @@ function AdminProductsPage() {
     try {
       if (selectedProduct) {
         await updateProduct({ identifier: selectedProduct.slug || selectedProduct.id, ...values }).unwrap();
-        setFeedback({ type: 'success', message: 'Product updated successfully.' });
+        setFeedback({
+          type: 'success',
+          message: 'Product updated successfully. Audit logging is now recorded on the backend.',
+        });
       } else {
         await createProduct(values).unwrap();
-        setFeedback({ type: 'success', message: 'Product created successfully.' });
+        setFeedback({
+          type: 'success',
+          message: 'Product created successfully. Initial stock and audit logging were recorded.',
+        });
       }
 
       setSelectedProduct(null);
@@ -59,6 +81,32 @@ function AdminProductsPage() {
       setFeedback({
         type: 'error',
         message: mutationError?.data?.message || 'Product save failed. Review the form and try again.',
+      });
+    }
+  }
+
+  async function handleAdjustStock(values) {
+    if (!selectedStockProduct) {
+      return;
+    }
+
+    setFeedback(null);
+
+    try {
+      await adjustProductStock({
+        identifier: selectedStockProduct.slug || selectedStockProduct.id,
+        ...values,
+      }).unwrap();
+
+      setFeedback({
+        type: 'success',
+        message: `Stock updated for ${selectedStockProduct.name}. Movement and audit entries were recorded.`,
+      });
+      setSelectedStockProduct(null);
+    } catch (mutationError) {
+      setFeedback({
+        type: 'error',
+        message: mutationError?.data?.message || 'Could not apply the stock adjustment.',
       });
     }
   }
@@ -74,7 +122,7 @@ function AdminProductsPage() {
 
       setFeedback({
         type: 'success',
-        message: `${product.name} is now ${product.isActive ? 'inactive' : 'active'}.`,
+        message: `${product.name} is now ${product.isActive ? 'inactive' : 'active'}. The change was audit logged.`,
       });
     } catch (mutationError) {
       setFeedback({
@@ -88,11 +136,30 @@ function AdminProductsPage() {
     <section className="space-y-6">
       <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
         <p className="text-xs uppercase tracking-[0.35em] text-violet-300">Admin products</p>
-        <h2 className="mt-3 text-3xl font-semibold text-white">Manage catalog entries</h2>
+        <h2 className="mt-3 text-3xl font-semibold text-white">Manage catalog entries and inventory</h2>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
-          This admin view uses protected product endpoints, role-based route access, and live category
-          data from the backend.
+          This admin view now supports explicit inventory adjustments, low-stock visibility, and backend
+          audit logging for product management actions.
         </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <article className="rounded-3xl border border-white/10 bg-white/5 p-5">
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Visible on page</p>
+          <p className="mt-3 text-2xl font-semibold text-white">{inventorySummary.visibleOnPage}</p>
+        </article>
+        <article className="rounded-3xl border border-amber-400/20 bg-amber-500/10 p-5">
+          <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Low stock products</p>
+          <p className="mt-3 text-2xl font-semibold text-white">{inventorySummary.lowStockCount}</p>
+        </article>
+        <article className="rounded-3xl border border-rose-400/20 bg-rose-500/10 p-5">
+          <p className="text-xs uppercase tracking-[0.25em] text-rose-200">Zero stock</p>
+          <p className="mt-3 text-2xl font-semibold text-white">{inventorySummary.zeroStockCount}</p>
+        </article>
+        <article className="rounded-3xl border border-white/10 bg-slate-950/60 p-5">
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Inactive products</p>
+          <p className="mt-3 text-2xl font-semibold text-white">{inventorySummary.inactiveCount}</p>
+        </article>
       </div>
 
       <AdminProductForm
@@ -101,6 +168,13 @@ function AdminProductsPage() {
         onCancel={() => setSelectedProduct(null)}
         onSubmit={handleCreateOrUpdate}
         product={selectedProduct}
+      />
+
+      <AdminStockAdjustmentForm
+        isSubmitting={isAdjustingStock}
+        onCancel={() => setSelectedStockProduct(null)}
+        onSubmit={handleAdjustStock}
+        product={selectedStockProduct}
       />
 
       {feedback ? (
@@ -196,7 +270,14 @@ function AdminProductsPage() {
       {!isLoading && !isError ? (
         <AdminProductsTable
           products={products}
-          onEdit={setSelectedProduct}
+          onAdjustStock={(product) => {
+            setSelectedStockProduct(product);
+            setSelectedProduct(null);
+          }}
+          onEdit={(product) => {
+            setSelectedProduct(product);
+            setSelectedStockProduct(null);
+          }}
           onToggleStatus={handleToggleStatus}
           isToggling={isUpdating}
         />

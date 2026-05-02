@@ -15,6 +15,8 @@ This repository currently includes:
 - Cart and simulated checkout flow
 - Authenticated account area with order history and order detail view
 - Admin product management UI for role-protected catalog editing
+- Admin inventory adjustment flow with stock movement tracking
+- Backend audit logging for important admin product actions
 - React Hook Form + Zod auth forms
 - Frontend tests for auth form validation and product card rendering
 - Starter Docker setup
@@ -287,9 +289,10 @@ Expected services:
 ### Backend
 - Auth routes: register, login, refresh, logout, me
 - Categories route: list active categories
-- Product routes: public list, detail, admin managed list, create, update, soft delete
+- Product routes: public list, detail, admin managed list, create, update, soft delete, and dedicated stock adjustment
 - Checkout route: protected simulated checkout with backend total calculation, coupon validation, payment simulation, order creation, notification creation, and stock reduction on approved payments
 - Order routes: authenticated order history and owner-only order detail access
+- Audit logging for important admin product actions
 - Validation middleware
 - JWT auth middleware
 - Role authorization middleware
@@ -302,7 +305,7 @@ Expected services:
 - Product detail page with add-to-cart actions
 - Cart page with local Redux state and quantity management
 - Protected checkout page with simulated payment form
-- Admin product management page
+- Admin product management page with dedicated inventory adjustment flow and low-stock visibility
 - RTK Query base API
 - Auth slice, cart slice with local storage persistence, categories API slice, products API slice, checkout API slice, and orders API slice
 - Protected route and role-protected route components

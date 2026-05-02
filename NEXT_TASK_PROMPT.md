@@ -1,71 +1,76 @@
 # Next Task Prompt — NOVA Store
 
 ## Objective
-Implement backend auth and product integration tests with Supertest for the current Express API.
+Implement improved auth/session bootstrap persistence for the current frontend and backend auth flow.
 
 ## Why
-The project now has working authentication flows, role-aware frontend routing, categories, and an admin product management UI. The highest-value next improvement is backend integration coverage for security-sensitive and business-critical endpoints.
+The application now has meaningful authenticated value across account, checkout, order history, and admin product management. The biggest remaining UX and architecture gap is that auth still mainly lives in Redux memory state, so a refresh can drop the active session experience even though refresh tokens and backend auth endpoints already exist.
 
 This task matters because it will:
-- validate login and authenticated-user behavior against the real API
-- confirm admin-only product access is enforced on the backend
-- verify request validation behavior for product mutations
-- strengthen portfolio quality by showing real API test discipline
+- make login state feel more production-like across page refreshes
+- improve role-aware route behavior for `/account`, `/checkout`, and `/admin/products`
+- better align the frontend with the existing backend refresh/me capabilities
+- strengthen portfolio quality by showing realistic session bootstrap handling
 
 ## Scope
 Include:
-1. server-side test setup for integration testing
-2. auth login success test
-3. auth login failure test
-4. authenticated `/api/auth/me` test
-5. admin-only product route protection tests
-6. product create or update validation tests for invalid payloads
-7. any minimal supporting test utilities or scripts needed to run the tests cleanly
+1. frontend auth bootstrap strategy on app load
+2. safe persistence of only the minimum auth data needed for bootstrap
+3. refresh-token or equivalent existing-auth-flow reuse instead of a major auth rewrite
+4. graceful handling for expired or invalid persisted auth state
+5. keeping role-aware redirects and protected routes working after refresh
+6. any small supporting utilities/hooks/components needed to keep the architecture clean
+7. documentation updates if setup, behavior, or auth expectations change
 
 ## Out of Scope
 Do not include yet:
-- frontend test expansion beyond what already exists
 - cookie-based auth refactor
-- audit log feature implementation
-- checkout, orders, coupons, wishlist, or reviews tests
-- major production refactors unrelated to testability
+- OAuth or social login
+- major backend auth redesign unrelated to bootstrap persistence
+- wishlist, reviews, coupons, or checkout refactors unrelated to auth persistence
+- broad frontend test expansion unless a very small supporting test is clearly needed
 
 ## Files / Areas Likely Involved
-- `server/package.json`
-- `server/src/app.js`
-- `server/src/routes/auth.routes.js`
-- `server/src/routes/product.routes.js`
-- `server/src/services/...`
-- `server/src/repositories/...`
-- `server/src/middlewares/...`
-- `server/tests/...` or a similarly clean backend test folder
-- optional test env/setup files
+- `client/src/main.jsx`
+- `client/src/App.jsx`
+- `client/src/app/store.js`
+- `client/src/features/auth/authSlice.js`
+- `client/src/features/auth/api/authApi.js`
+- `client/src/components/layout/ProtectedRoute.jsx`
+- `client/src/components/layout/RoleProtectedRoute.jsx`
+- `client/src/router/index.jsx`
+- optional small auth bootstrap utility files
+- `README.md`
+- `CHAT_CONTEXT_HANDOFF.md`
 
 ## Acceptance Criteria
-- [ ] Backend test runner and Supertest setup exists and is documented if needed
-- [ ] A passing integration test verifies successful login with seeded demo credentials
-- [ ] A passing integration test verifies invalid login is rejected safely
-- [ ] A passing integration test verifies `/api/auth/me` requires valid auth and returns the authenticated user
-- [ ] A passing integration test verifies non-admin access is blocked from admin product routes
-- [ ] A passing integration test verifies invalid product payloads return validation errors
-- [ ] Tests can be run with a clear command from the server workspace or repository root
+- [ ] Refreshing the page does not immediately lose the intended authenticated experience when valid auth state can be restored
+- [ ] The bootstrap logic reuses the existing backend auth flow cleanly
+- [ ] Invalid or expired persisted auth state is cleared safely without broken UI loops
+- [ ] Protected user routes still require valid auth after bootstrap completes
+- [ ] Admin role-aware routing still behaves correctly after refresh/bootstrap
+- [ ] Persistence avoids unnecessary or overly unsafe auth storage decisions
+- [ ] Any important auth behavior changes are documented
 
 ## Constraints / Preferences
-- keep the current layered backend architecture
-- prefer small, focused test utilities
-- do not hardcode secrets beyond documented demo credentials already used by the project
-- avoid unnecessary libraries beyond a normal backend test stack
-- keep security behavior explicit in tests
-- document important test commands if setup changes
-- assume Docker is available, but keep tests understandable for local runs too
+- keep the current layered and feature-based architecture
+- prefer small, explicit auth bootstrap utilities over clever abstractions
+- avoid unsafe persistence patterns for sensitive data when a safer minimal approach works
+- do not introduce a major backend refactor if the current refresh/me flow can support the goal
+- keep route/loading behavior understandable for recruiters and reviewers reading the code
+- assume Docker is available, but this task is feature development, not Docker troubleshooting
 
 ## Notes
 Current important context:
 - Docker is working now
-- the project already has valid seeded demo users
 - demo credentials are:
   - Admin: `admin@novastore.dev`
   - User: `user@novastore.dev`
   - Password: `NovaStore123!`
-- auth and admin product flows already exist and should be the first backend-tested surfaces
+- the repo now already includes:
+  - cart and checkout simulation
+  - authenticated order history and order detail
+  - admin stock adjustment flow
+  - audit logging groundwork for admin product actions
+- auth persistence is explicitly called out in `CHAT_CONTEXT_HANDOFF.md` as the next important gap
 - read `NEXT_CHAT_INSTRUCTIONS.md` first in the next chat before making changes
