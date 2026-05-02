@@ -3,6 +3,7 @@ import { Router } from 'express';
 import categoryRouter from './category.routes.js';
 import checkoutRouter from './checkout.routes.js';
 import healthRouter from './health.routes.js';
+import orderRouter from './order.routes.js';
 import productRouter from './product.routes.js';
 
 const router = Router();
@@ -10,6 +11,7 @@ const router = Router();
 router.use('/', healthRouter);
 router.use('/categories', categoryRouter);
 router.use('/checkout', checkoutRouter);
+router.use('/orders', orderRouter);
 router.use('/products', productRouter);
 
 router.get('/', (_req, res) => {
@@ -22,6 +24,8 @@ router.get('/', (_req, res) => {
         '/api/health/db',
         '/api/categories',
         '/api/checkout',
+        '/api/orders',
+        '/api/orders/:orderId',
         '/api/products',
         '/api/products/manage',
         '/api/products/:productIdOrSlug',

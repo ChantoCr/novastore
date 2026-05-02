@@ -342,6 +342,29 @@ Behavior:
 - backend creates order, order items, payment record, and user notification for every checkout attempt
 - stock and coupon usage are updated only when the payment result is approved
 
+### 12) Phase 5 orders and profile expansion was implemented
+Created:
+- `server/src/routes/order.routes.js`
+- `server/src/controllers/order.controller.js`
+- `server/src/services/order.service.js`
+- `server/src/repositories/order.repository.js`
+- `server/src/validators/order.validators.js`
+- `client/src/features/orders/api/ordersApi.js`
+- `client/src/features/orders/components/OrderHistoryList.jsx`
+- `client/src/features/orders/components/OrderDetailPanel.jsx`
+
+Updated:
+- `server/src/routes/index.js`
+- `client/src/services/baseApi.js`
+- `client/src/pages/AccountPage.jsx`
+- `README.md`
+
+Behavior:
+- authenticated users can now load their order history from the backend
+- authenticated users can inspect owner-only order detail data including items, addresses, totals, coupon code, and payment simulation metadata
+- the account page now acts as a profile and order-history dashboard instead of only showing basic auth state
+- order history includes summary metrics such as total orders, approved orders, pending orders, and approved spend
+
 ---
 
 ## Current Demo Credentials
@@ -388,6 +411,10 @@ Categories:
 
 Checkout:
 - `POST /api/checkout` authenticated simulated checkout
+
+Orders:
+- `GET /api/orders` authenticated order history
+- `GET /api/orders/:orderId` authenticated owner-only order detail
 
 Products:
 - `GET /api/products`
@@ -450,26 +477,26 @@ Do not break these patterns:
 ## Recommended Next Task
 The recommended next implementation is:
 
-### Phase 5 — Orders and profile expansion
+### Stock and audit-log focused admin improvements
 Reason:
-- Phase 4 now creates real order, order item, payment, coupon usage, notification, and stock movement records
-- the next highest-value user-facing step is exposing those records through authenticated order history and account/profile UX
-- this builds naturally on the new checkout foundation without jumping ahead to unrelated admin or testing work
+- checkout now creates real sales-side stock movements, while admin product management already exists
+- the biggest architecture gap is making stock changes and important admin product actions more observable and auditable
+- this builds naturally toward the later admin and audit-log phases while strengthening portfolio realism
 
 Recommended scope:
-1. authenticated backend order-history endpoints
-2. order detail endpoint for the authenticated owner
-3. frontend order history UI under the account area
-4. account/profile improvements that surface checkout-created data clearly
+1. admin stock adjustment endpoint and UI controls
+2. audit log creation for product create/update/activation changes
+3. low-stock visibility improvements in admin product management
+4. optional read-only admin audit log listing if the time budget allows
 
 ---
 
 ## Suggested Implementation Priorities After That
-After order history and profile expansion, the next strong options are:
-1. audit logs for admin product actions
-2. improved auth/session bootstrap persistence
-3. categories admin CRUD
-4. checkout-focused backend integration tests for coupon and order flows
+After stock and audit-log focused admin improvements, the next strong options are:
+1. improved auth/session bootstrap persistence
+2. categories admin CRUD
+3. checkout-focused backend integration tests for coupon and order flows
+4. wishlist and reviews groundwork
 
 ---
 

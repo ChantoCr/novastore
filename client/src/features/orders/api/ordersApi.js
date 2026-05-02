@@ -1,0 +1,25 @@
+import { baseApi } from '../../../services/baseApi.js';
+
+export const ordersApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getMyOrders: builder.query({
+      query: (params = {}) => ({
+        url: '/orders',
+        params,
+      }),
+      providesTags: (result) =>
+        result?.data?.items
+          ? [
+              ...result.data.items.map((order) => ({ type: 'Orders', id: order.id })),
+              { type: 'Orders', id: 'LIST' },
+            ]
+          : [{ type: 'Orders', id: 'LIST' }],
+    }),
+    getMyOrderById: builder.query({
+      query: (orderId) => `/orders/${orderId}`,
+      providesTags: (_result, _error, orderId) => [{ type: 'Orders', id: orderId }],
+    }),
+  }),
+});
+
+export const { useGetMyOrderByIdQuery, useGetMyOrdersQuery } = ordersApi;

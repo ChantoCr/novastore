@@ -10,9 +10,10 @@ This repository currently includes:
 - AI project guidance in `AGENTS.md`
 - Specialized skill files in `skills/`
 - Base frontend and backend scaffolding
-- Auth module structure on frontend and backend
-- Products module skeleton on frontend and backend
-- Categories read module on frontend and backend
+- Working auth module on frontend and backend
+- Products and categories browsing flows
+- Cart and simulated checkout flow
+- Authenticated account area with order history and order detail view
 - Admin product management UI for role-protected catalog editing
 - React Hook Form + Zod auth forms
 - Frontend tests for auth form validation and product card rendering
@@ -288,6 +289,7 @@ Expected services:
 - Categories route: list active categories
 - Product routes: public list, detail, admin managed list, create, update, soft delete
 - Checkout route: protected simulated checkout with backend total calculation, coupon validation, payment simulation, order creation, notification creation, and stock reduction on approved payments
+- Order routes: authenticated order history and owner-only order detail access
 - Validation middleware
 - JWT auth middleware
 - Role authorization middleware
@@ -295,14 +297,14 @@ Expected services:
 
 ### Frontend
 - Auth pages: login and register with React Hook Form + Zod
-- Authenticated account page
+- Authenticated account page with order history and order detail panel
 - Product listing page with live category filters
 - Product detail page with add-to-cart actions
 - Cart page with local Redux state and quantity management
 - Protected checkout page with simulated payment form
 - Admin product management page
 - RTK Query base API
-- Auth slice, cart slice with local storage persistence, categories API slice, products API slice, and checkout API slice
+- Auth slice, cart slice with local storage persistence, categories API slice, products API slice, checkout API slice, and orders API slice
 - Protected route and role-protected route components
 
 ## Environment Variables
