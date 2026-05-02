@@ -1,12 +1,30 @@
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 
+import { addItem } from '../features/cart/cartSlice.js';
 import { useGetProductByIdentifierQuery } from '../features/products/api/productsApi.js';
 import { formatCurrency } from '../utils/currency.js';
 
 function ProductDetailPage() {
+  const dispatch = useDispatch();
   const { productIdOrSlug } = useParams();
   const { data, isLoading, isError, error } = useGetProductByIdentifierQuery(productIdOrSlug);
   const product = data?.data;
+  const [quantity, setQuantity] = useState(1);
+
+  function handleAddToCart() {
+    if (!product) {
+      return;
+    }
+
+    dispatch(
+      addItem({
+        product,
+        quantity,
+      }),
+    );
+  }
 
   if (isLoading) {
     return (
@@ -73,9 +91,45 @@ function ProductDetailPage() {
             </span>
           </div>
 
-          <div className="rounded-3xl border border-emerald-400/20 bg-emerald-500/10 p-5 text-sm leading-6 text-emerald-100">
-            This is a product detail scaffold. Later phases will add reviews, wishlist, cart actions, and
-            purchase logic.
+          <div className="space-y-4 rounded-3xl border border-white/10 bg-slate-950/70 p-5">
+            <div className="flex flex-wrap items-end gap-4">
+              <label className="text-sm text-slate-200">
+                Quantity
+                <input
+                  type="number"
+                  min="1"
+                  max={Math.max(1, product.stock)}
+                  value={quantity}
+                  onChange={(event) =>
+                    setQuantity(
+                      Math.max(1, Math.min(Number(event.target.value) || 1, Math.max(1, product.stock))),
+                    )
+                  }
+                  className="mt-2 w-28 rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white"
+                />
+              </label>
+
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={product.stock <= 0}
+                className="rounded-full bg-violet-500 px-5 py-3 text-sm font-medium text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Add to cart
+              </button>
+
+              <Link
+                to="/cart"
+                className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-100 transition hover:border-violet-400/30"
+              >
+                View cart
+              </Link>
+            </div>
+
+            <div className="rounded-3xl border border-emerald-400/20 bg-emerald-500/10 p-5 text-sm leading-6 text-emerald-100">
+              Cart and checkout simulation are now available. Reviews and wishlist will still arrive in later
+              phases.
+            </div>
           </div>
         </div>
       </div>

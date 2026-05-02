@@ -3,15 +3,18 @@ import { NavLink, Outlet } from 'react-router-dom';
 
 import { clearCredentials } from '../features/auth/authSlice.js';
 import { useLogoutMutation } from '../features/auth/api/authApi.js';
+import { selectCartItemCount } from '../features/cart/cartSlice.js';
 
 function PublicLayout() {
   const dispatch = useDispatch();
   const { isAuthenticated, refreshToken, role, user } = useSelector((state) => state.auth);
+  const cartItemCount = useSelector(selectCartItemCount);
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
 
   const navItems = [
     { label: 'Home', to: '/' },
     { label: 'Products', to: '/products' },
+    { label: `Cart${cartItemCount ? ` (${cartItemCount})` : ''}`, to: '/cart' },
     ...(isAuthenticated ? [{ label: 'Account', to: '/account' }] : []),
     ...(role === 'admin' ? [{ label: 'Admin', to: '/admin/products' }] : []),
     ...(!isAuthenticated

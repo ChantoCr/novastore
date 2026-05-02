@@ -304,6 +304,44 @@ Behavior:
 - server workspace command: `npm run test:run`
 - backend env loading now supports a root `.env.test` override during tests, which helps host-machine test runs use `DB_HOST=localhost` without breaking the default Docker `.env`
 
+### 11) Phase 4 cart and checkout simulation was implemented
+Created:
+- `server/src/routes/checkout.routes.js`
+- `server/src/controllers/checkout.controller.js`
+- `server/src/services/checkout.service.js`
+- `server/src/repositories/checkout.repository.js`
+- `server/src/validators/checkout.validators.js`
+- `client/src/features/cart/cartStorage.js`
+- `client/src/features/cart/cartSlice.js`
+- `client/src/features/cart/components/CartItemCard.jsx`
+- `client/src/features/cart/components/CartSummaryCard.jsx`
+- `client/src/features/checkout/api/checkoutApi.js`
+- `client/src/features/checkout/components/CheckoutForm.jsx`
+- `client/src/features/checkout/validation/checkoutFormSchema.js`
+- `client/src/pages/CartPage.jsx`
+- `client/src/pages/CheckoutPage.jsx`
+
+Updated:
+- `server/src/routes/index.js`
+- `client/src/app/store.js`
+- `client/src/router/index.jsx`
+- `client/src/layouts/PublicLayout.jsx`
+- `client/src/features/products/components/ProductCard.jsx`
+- `client/src/features/products/components/ProductCard.test.jsx`
+- `client/src/pages/ProductDetailPage.jsx`
+- `client/src/pages/HomePage.jsx`
+- `README.md`
+
+Behavior:
+- cart state now exists in Redux and persists to local storage on the client
+- users can add catalog products to the cart from product cards and the product detail page
+- `/cart` is public and `/checkout` is protected
+- checkout posts only product IDs and quantities to the backend
+- backend recalculates subtotal, coupon discount, tax, and final total
+- backend simulates payment results based on demo card endings: `4242` approved, `0002` rejected, `9995` pending
+- backend creates order, order items, payment record, and user notification for every checkout attempt
+- stock and coupon usage are updated only when the payment result is approved
+
 ---
 
 ## Current Demo Credentials
@@ -324,9 +362,11 @@ Public:
 - `/register`
 - `/products`
 - `/products/:productIdOrSlug`
+- `/cart`
 
 Authenticated:
 - `/account`
+- `/checkout`
 
 Admin:
 - `/admin/products`
@@ -345,6 +385,9 @@ Auth:
 
 Categories:
 - `GET /api/categories`
+
+Checkout:
+- `POST /api/checkout` authenticated simulated checkout
 
 Products:
 - `GET /api/products`
@@ -407,26 +450,26 @@ Do not break these patterns:
 ## Recommended Next Task
 The recommended next implementation is:
 
-### Backend auth/product integration tests with Supertest
+### Phase 5 — Orders and profile expansion
 Reason:
-- auth and admin product flows are now important and security-sensitive
-- backend verification will give the strongest quality improvement for the current state of the app
-- this aligns directly with `skills/testing/SKILL.md` and `skills/security/SKILL.md`
+- Phase 4 now creates real order, order item, payment, coupon usage, notification, and stock movement records
+- the next highest-value user-facing step is exposing those records through authenticated order history and account/profile UX
+- this builds naturally on the new checkout foundation without jumping ahead to unrelated admin or testing work
 
 Recommended scope:
-1. test setup for server
-2. auth login and `/api/auth/me` tests
-3. admin product authorization tests
-4. product validation tests
+1. authenticated backend order-history endpoints
+2. order detail endpoint for the authenticated owner
+3. frontend order history UI under the account area
+4. account/profile improvements that surface checkout-created data clearly
 
 ---
 
 ## Suggested Implementation Priorities After That
-After backend integration tests, the next strong options are:
+After order history and profile expansion, the next strong options are:
 1. audit logs for admin product actions
-2. improved session bootstrap / persistence strategy
+2. improved auth/session bootstrap persistence
 3. categories admin CRUD
-4. stock and audit-log focused admin improvements
+4. checkout-focused backend integration tests for coupon and order flows
 
 ---
 

@@ -36,8 +36,8 @@ function HomePage() {
           Build an e-commerce platform that feels real, scalable, and review-ready.
         </h2>
         <p className="mt-4 max-w-2xl text-base text-slate-300 sm:text-lg">
-          The project now includes auth and products module scaffolding, linting, formatting, Docker setup,
-          database schema, and migration-ready SQL structure.
+          The project now includes working auth, products, categories, admin product management, and a
+          cart-to-checkout simulation flow with backend order creation.
         </p>
 
         <div className="mt-6 flex flex-wrap gap-3 text-sm text-slate-200">
@@ -52,13 +52,13 @@ function HomePage() {
             to="/products"
             className="rounded-full bg-violet-500 px-5 py-3 text-sm font-medium text-white transition hover:bg-violet-400"
           >
-            Explore products scaffold
+            Explore products and cart flow
           </Link>
           <Link
             to="/login"
             className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-100 transition hover:border-violet-400/30"
           >
-            Open auth scaffold
+            Open auth and checkout access
           </Link>
         </div>
       </div>

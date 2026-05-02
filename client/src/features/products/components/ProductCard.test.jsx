@@ -20,6 +20,7 @@ describe('ProductCard', () => {
           primaryImageUrl: null,
         }}
       />,
+      { withProvider: true },
     );
 
     expect(screen.getByText(/electronics/i)).toBeInTheDocument();

@@ -287,6 +287,7 @@ Expected services:
 - Auth routes: register, login, refresh, logout, me
 - Categories route: list active categories
 - Product routes: public list, detail, admin managed list, create, update, soft delete
+- Checkout route: protected simulated checkout with backend total calculation, coupon validation, payment simulation, order creation, notification creation, and stock reduction on approved payments
 - Validation middleware
 - JWT auth middleware
 - Role authorization middleware
@@ -296,10 +297,12 @@ Expected services:
 - Auth pages: login and register with React Hook Form + Zod
 - Authenticated account page
 - Product listing page with live category filters
-- Product detail page
+- Product detail page with add-to-cart actions
+- Cart page with local Redux state and quantity management
+- Protected checkout page with simulated payment form
 - Admin product management page
 - RTK Query base API
-- Auth slice, categories API slice, and products API slice
+- Auth slice, cart slice with local storage persistence, categories API slice, products API slice, and checkout API slice
 - Protected route and role-protected route components
 
 ## Environment Variables
@@ -426,9 +429,9 @@ Current coverage includes:
 - backend host/Docker-aware test environment support
 
 Planned next coverage includes:
-- checkout calculations
-- coupon validation
-- order creation
+- backend checkout calculations
+- backend coupon validation
+- backend order creation flow assertions
 
 ## What Makes NOVA Store Different
 This project is intentionally structured to go beyond a beginner e-commerce demo by focusing on:

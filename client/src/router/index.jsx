@@ -6,6 +6,8 @@ import AdminLayout from '../layouts/AdminLayout.jsx';
 import PublicLayout from '../layouts/PublicLayout.jsx';
 import AccountPage from '../pages/AccountPage.jsx';
 import AdminProductsPage from '../pages/AdminProductsPage.jsx';
+import CartPage from '../pages/CartPage.jsx';
+import CheckoutPage from '../pages/CheckoutPage.jsx';
 import HomePage from '../pages/HomePage.jsx';
 import LoginPage from '../pages/LoginPage.jsx';
 import ProductDetailPage from '../pages/ProductDetailPage.jsx';
@@ -36,6 +38,18 @@ export const router = createBrowserRouter([
       {
         path: 'products/:productIdOrSlug',
         element: <ProductDetailPage />,
+      },
+      {
+        path: 'cart',
+        element: <CartPage />,
+      },
+      {
+        path: 'checkout',
+        element: (
+          <ProtectedRoute>
+            <CheckoutPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'account',

@@ -1,9 +1,21 @@
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
+import { addItem } from '../../cart/cartSlice.js';
 import { formatCurrency } from '../../../utils/currency.js';
 
 function ProductCard({ product }) {
+  const dispatch = useDispatch();
   const isLowStock = product.stock <= product.lowStockThreshold;
+
+  function handleAddToCart() {
+    dispatch(
+      addItem({
+        product,
+        quantity: 1,
+      }),
+    );
+  }
 
   return (
     <article className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 transition hover:-translate-y-1 hover:border-violet-400/30">
@@ -39,16 +51,26 @@ function ProductCard({ product }) {
           {product.description || 'Product description will be added in later implementation phases.'}
         </p>
 
-        <div className="flex items-center justify-between gap-4 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
           <span className={isLowStock ? 'text-amber-300' : 'text-emerald-300'}>
             {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
           </span>
-          <Link
-            to={`/products/${product.slug || product.id}`}
-            className="rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-violet-200 transition hover:bg-violet-500/20"
-          >
-            View product
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={product.stock <= 0}
+              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-slate-100 transition hover:border-violet-400/30 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Add to cart
+            </button>
+            <Link
+              to={`/products/${product.slug || product.id}`}
+              className="rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-violet-200 transition hover:bg-violet-500/20"
+            >
+              View product
+            </Link>
+          </div>
         </div>
       </div>
     </article>
