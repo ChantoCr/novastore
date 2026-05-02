@@ -79,6 +79,7 @@ Implementation of full business features will follow the development phases defi
 - Docker Compose
 - ESLint
 - Prettier
+- Node.js test runner
 - Vitest
 - Testing Library
 
@@ -205,6 +206,8 @@ cp .env.example .env
 ```
 
 If you are on Windows PowerShell, you can also create `.env` manually from `.env.example`.
+
+For backend integration tests on the host machine, you can also create a root `.env.test` from `.env.test.example` so test-only DB overrides do not affect the normal Docker setup.
 
 ### 2) Install dependencies
 
@@ -335,6 +338,35 @@ Run frontend tests:
 npm run test:run -w client
 ```
 
+Run backend integration tests from the repository root:
+
+```bash
+npm run test:server
+```
+
+Or from the server workspace:
+
+```bash
+cd server
+npm run test:run
+```
+
+Docker-first shortcut from the repository root:
+
+```bash
+npm run test:server:docker
+```
+
+If you are using the default Docker-based setup and your host machine cannot resolve the Docker-only MySQL hostname, run the tests inside the server container instead:
+
+```bash
+docker compose exec server npm run test:run
+```
+
+If you are running the tests from the host machine against a manual local MySQL instance, create a root `.env.test` from `.env.test.example` and set `DB_HOST=localhost` there.
+
+These backend integration tests expect the seeded demo users to exist in the configured database.
+
 ## Demo Data Notes
 The seed file includes starter roles, categories, products, coupons, and demo users.
 
@@ -384,14 +416,16 @@ High-level phases:
 
 ## Testing Strategy
 Current coverage includes:
-- login form validation
-- login form submit behavior
-- product card rendering
+- frontend login form validation
+- frontend login form submit behavior
+- frontend product card rendering
+- backend auth login success and failure
+- backend authenticated `/api/auth/me` behavior
+- backend admin product route protection
+- backend product mutation validation failures
+- backend host/Docker-aware test environment support
 
 Planned next coverage includes:
-- backend auth flows
-- protected routes and role authorization
-- product endpoints
 - checkout calculations
 - coupon validation
 - order creation

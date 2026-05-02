@@ -1,5 +1,21 @@
+import { fileURLToPath } from 'node:url';
+
 import dotenv from 'dotenv';
 import { z } from 'zod';
+
+const rootEnvPath = fileURLToPath(new URL('../../../.env', import.meta.url));
+const rootTestEnvPath = fileURLToPath(new URL('../../../.env.test', import.meta.url));
+
+dotenv.config({
+  path: rootEnvPath,
+});
+
+if (process.env.NODE_ENV === 'test') {
+  dotenv.config({
+    path: rootTestEnvPath,
+    override: true,
+  });
+}
 
 dotenv.config();
 

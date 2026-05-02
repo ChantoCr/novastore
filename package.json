@@ -11,7 +11,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
-    "format:check": "prettier . --check"
+    "format:check": "prettier . --check",
+    "test:server": "npm run test:run -w server",
+    "test:server:docker": "docker compose exec server npm run test:run"
   },
   "devDependencies": {
     "@eslint/js": "^9.26.0",

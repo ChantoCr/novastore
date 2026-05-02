@@ -280,6 +280,30 @@ Notes:
 - outdated placeholder-password wording was corrected
 - Docker guidance was updated to reflect the new dependency-sync behavior
 
+### 10) Backend integration test setup was added
+Created:
+- `server/tests/auth.test.js`
+- `server/tests/product.test.js`
+- `server/tests/helpers/auth.js`
+- `server/tests/helpers/db.js`
+- `server/scripts/run-tests.js`
+- `.env.test.example`
+
+Updated:
+- `.gitignore`
+- `server/package.json`
+- `server/src/config/env.js`
+- root `package.json`
+- `README.md`
+
+Behavior:
+- backend now has a Supertest integration test setup using the Node.js test runner
+- tests cover login success, login failure, authenticated `/api/auth/me`, admin-only product protection, and invalid product mutation payloads
+- root command: `npm run test:server`
+- Docker shortcut: `npm run test:server:docker`
+- server workspace command: `npm run test:run`
+- backend env loading now supports a root `.env.test` override during tests, which helps host-machine test runs use `DB_HOST=localhost` without breaking the default Docker `.env`
+
 ---
 
 ## Current Demo Credentials

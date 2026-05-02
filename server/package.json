@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "lint": "eslint src scripts",
-    "lint:fix": "eslint src scripts --fix",
-    "format": "prettier src scripts --write",
+    "lint": "eslint src scripts tests",
+    "lint:fix": "eslint src scripts tests --fix",
+    "format": "prettier src scripts tests --write",
+    "test": "node scripts/run-tests.js",
+    "test:run": "node scripts/run-tests.js",
     "hash:password": "node scripts/generate-password-hash.js"
   },
   "dependencies": {
@@ -24,6 +26,7 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4"
   }
 }
