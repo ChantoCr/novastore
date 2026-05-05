@@ -22,6 +22,26 @@ function FieldError({ message }) {
   return <p className="mt-2 text-xs text-rose-300">{message}</p>;
 }
 
+function collectErrorMessages(errorTree) {
+  if (!errorTree) {
+    return [];
+  }
+
+  if (typeof errorTree.message === 'string') {
+    return [errorTree.message];
+  }
+
+  if (Array.isArray(errorTree)) {
+    return errorTree.flatMap(collectErrorMessages);
+  }
+
+  if (typeof errorTree === 'object') {
+    return Object.values(errorTree).flatMap(collectErrorMessages);
+  }
+
+  return [];
+}
+
 function AddressSection({ title, prefix, register, errors }) {
   return (
     <section className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6">
@@ -47,12 +67,13 @@ function AddressSection({ title, prefix, register, errors }) {
   );
 }
 
-function CheckoutForm({ user, onSubmit, isSubmitting }) {
+function CheckoutForm({ user, onSubmit, isSubmitting, submitError = null }) {
   const {
     register,
     handleSubmit,
+    setValue,
     watch,
-    formState: { errors },
+    formState: { errors, isSubmitted },
   } = useForm({
     resolver: zodResolver(checkoutFormSchema),
     shouldUnregister: true,
@@ -91,21 +112,77 @@ function CheckoutForm({ user, onSubmit, isSubmitting }) {
   });
 
   const billingSameAsShipping = watch('billingSameAsShipping');
+  const validationMessages = Array.from(new Set(collectErrorMessages(errors)));
+
+  function applyDemoCard(cardNumber) {
+    setValue('paymentMethod.cardNumber', cardNumber, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
+  }
 
   return (
     <form
-      onSubmit={handleSubmit((values) =>
-        onSubmit({
-          ...values,
-          billingAddress: values.billingSameAsShipping ? undefined : values.billingAddress,
-        })
+      onSubmit={handleSubmit(
+        (values) =>
+          onSubmit({
+            ...values,
+            billingAddress: values.billingSameAsShipping ? undefined : values.billingAddress,
+          }),
+        () => {
+          // Validation errors are surfaced by the summary below.
+        },
       )}
       className="space-y-6"
     >
       <div className="rounded-3xl border border-emerald-400/20 bg-emerald-500/10 p-5 text-sm leading-6 text-emerald-100">
-        Demo payment scenarios: use a card ending in <strong>4242</strong> for approval,{' '}
-        <strong>0002</strong> for rejection, or <strong>9995</strong> for a pending payment.
+        <p>
+          Demo payment scenarios: use a full demo card number ending in <strong>4242</strong> for approval,
+          <strong> 0002</strong> for rejection, or <strong>9995</strong> for a pending payment.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2 text-xs">
+          <button
+            type="button"
+            onClick={() => applyDemoCard('4242 4242 4242 4242')}
+            className="rounded-full border border-white/10 bg-white/10 px-3 py-2 text-emerald-50 transition hover:bg-white/20"
+          >
+            Use approved card
+          </button>
+          <button
+            type="button"
+            onClick={() => applyDemoCard('4000 0000 0000 0002')}
+            className="rounded-full border border-white/10 bg-white/10 px-3 py-2 text-emerald-50 transition hover:bg-white/20"
+          >
+            Use rejected card
+          </button>
+          <button
+            type="button"
+            onClick={() => applyDemoCard('4000 0000 0000 9995')}
+            className="rounded-full border border-white/10 bg-white/10 px-3 py-2 text-emerald-50 transition hover:bg-white/20"
+          >
+            Use pending card
+          </button>
+        </div>
       </div>
+
+      {submitError ? (
+        <div className="rounded-3xl border border-rose-400/20 bg-rose-500/10 p-5 text-sm text-rose-100">
+          <p className="font-medium text-white">Checkout could not be submitted</p>
+          <p className="mt-2">{submitError}</p>
+        </div>
+      ) : null}
+
+      {isSubmitted && validationMessages.length ? (
+        <div className="rounded-3xl border border-amber-400/20 bg-amber-500/10 p-5 text-sm text-amber-100">
+          <p className="font-medium text-white">Please fix the highlighted fields</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            {validationMessages.map((message) => (
+              <li key={message}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <AddressSection
         title="Shipping address"

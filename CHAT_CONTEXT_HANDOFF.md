@@ -163,7 +163,10 @@ If the next assistant needs the shortest high-value summary before implementatio
 - the app now has meaningful authenticated user and admin workflows
 - auth/session bootstrap persistence now restores valid sessions after refreshes
 - checkout now has dedicated backend integration coverage for totals, coupon usage, payment simulation outcomes, and stock-handling rules
-- the next strongest follow-up work is likely admin audit-log exposure or broader admin/category expansion
+- checkout result UX now includes a direct account-order follow-up path
+- admins can now inspect platform-wide order history with customer and line-item pricing visibility
+- admins can now update order fulfillment status and review read-only audit logs for product and order actions
+- the next strongest follow-up work is likely broader admin/category expansion or image/audit refinement
 
 ### 1) Role-aware authentication UX is now working
 Implemented:
@@ -474,6 +477,8 @@ Authenticated:
 
 Admin:
 - `/admin/products`
+- `/admin/orders`
+- `/admin/audit-logs`
 
 ### Backend routes
 Health:
@@ -496,6 +501,12 @@ Checkout:
 Orders:
 - `GET /api/orders` authenticated order history
 - `GET /api/orders/:orderId` authenticated owner-only order detail
+- `GET /api/orders/admin` admin-only platform-wide order listing
+- `GET /api/orders/admin/:orderId` admin-only order detail access
+- `PATCH /api/orders/admin/:orderId/status` admin-only order status update
+
+Audit logs:
+- `GET /api/audit-logs` admin-only audit log listing
 
 Products:
 - `GET /api/products`

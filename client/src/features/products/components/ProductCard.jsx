@@ -2,6 +2,7 @@ import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import { addItem } from '../../cart/cartSlice.js';
+import { addToast } from '../../ui/uiSlice.js';
 import { formatCurrency } from '../../../utils/currency.js';
 
 function ProductCard({ product }) {
@@ -13,6 +14,13 @@ function ProductCard({ product }) {
       addItem({
         product,
         quantity: 1,
+      }),
+    );
+    dispatch(
+      addToast({
+        title: 'Added to cart',
+        message: `${product.name} was added to your cart.`,
+        type: 'success',
       }),
     );
   }

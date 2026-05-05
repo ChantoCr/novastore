@@ -72,6 +72,17 @@ function OrderDetailPanel({ order, isLoading }) {
         </div>
       </div>
 
+      {order.customer ? (
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Customer</p>
+          <div className="mt-3 space-y-1 leading-6">
+            <p className="font-medium text-white">{order.customer.name || 'Unknown customer'}</p>
+            {order.customer.email ? <p>{order.customer.email}</p> : null}
+            {order.customer.id ? <p>Customer ID: {order.customer.id}</p> : null}
+          </div>
+        </div>
+      ) : null}
+
       <div className="grid gap-4 md:grid-cols-2">
         <AddressBlock title="Shipping" address={order.shippingAddress} />
         <AddressBlock title="Billing" address={order.billingAddress} />

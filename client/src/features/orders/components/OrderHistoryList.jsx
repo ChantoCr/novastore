@@ -42,12 +42,12 @@ function getPaymentTone(paymentStatus) {
   return 'default';
 }
 
-function OrderHistoryList({ orders, selectedOrderId, onSelectOrder }) {
+function OrderHistoryList({ orders, selectedOrderId, onSelectOrder, emptyMessage = null }) {
   if (!orders.length) {
     return (
       <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm leading-6 text-slate-300">
-        No orders match the current filter yet. Complete the checkout simulation to create your first
-        order history entry.
+        {emptyMessage ||
+          'No orders match the current filter yet. Complete the checkout simulation to create your first order history entry.'}
       </div>
     );
   }
@@ -76,6 +76,12 @@ function OrderHistoryList({ orders, selectedOrderId, onSelectOrder }) {
                   {order.totalQuantity} item{order.totalQuantity === 1 ? '' : 's'} · {order.itemCount} line
                   {order.itemCount === 1 ? '' : 's'}
                 </p>
+                {order.customer?.name || order.customer?.email ? (
+                  <p className="mt-2 text-sm text-slate-300">
+                    Customer: {order.customer?.name || 'Unknown'}
+                    {order.customer?.email ? ` · ${order.customer.email}` : ''}
+                  </p>
+                ) : null}
               </div>
 
               <div className="flex flex-wrap gap-2">

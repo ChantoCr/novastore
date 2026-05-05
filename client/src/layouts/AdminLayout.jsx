@@ -28,6 +28,30 @@ function AdminLayout() {
               Product management
             </NavLink>
             <NavLink
+              to="/admin/orders"
+              className={({ isActive }) =>
+                `block rounded-2xl px-4 py-3 text-sm transition ${
+                  isActive
+                    ? 'bg-violet-500 text-white'
+                    : 'border border-white/10 bg-white/5 text-slate-200 hover:border-violet-400/30 hover:text-white'
+                }`
+              }
+            >
+              Orders
+            </NavLink>
+            <NavLink
+              to="/admin/audit-logs"
+              className={({ isActive }) =>
+                `block rounded-2xl px-4 py-3 text-sm transition ${
+                  isActive
+                    ? 'bg-violet-500 text-white'
+                    : 'border border-white/10 bg-white/5 text-slate-200 hover:border-violet-400/30 hover:text-white'
+                }`
+              }
+            >
+              Audit logs
+            </NavLink>
+            <NavLink
               to="/products"
               className={({ isActive }) =>
                 `block rounded-2xl px-4 py-3 text-sm transition ${

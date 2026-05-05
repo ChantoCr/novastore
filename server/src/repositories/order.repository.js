@@ -35,6 +35,14 @@ function mapOrderRow(row) {
     updatedAt: row.updated_at,
     itemCount: row.item_count === undefined ? undefined : Number(row.item_count),
     totalQuantity: row.total_quantity === undefined ? undefined : Number(row.total_quantity),
+    customer:
+      row.customer_id || row.customer_name || row.customer_email
+        ? {
+            id: row.customer_id ? Number(row.customer_id) : Number(row.user_id),
+            name: row.customer_name || null,
+            email: row.customer_email || null,
+          }
+        : null,
     payment: row.payment_record_id
       ? {
           id: row.payment_record_id,
@@ -64,6 +72,99 @@ function mapOrderItemRow(row) {
   };
 }
 
+function buildUserOrderListQuery({ whereClause }) {
+  return `
+    SELECT
+      o.id,
+      o.user_id,
+      o.coupon_id,
+      c.code AS coupon_code,
+      o.status,
+      o.subtotal,
+      o.discount_total,
+      o.tax_total,
+      o.total,
+      o.payment_status,
+      o.shipping_address,
+      o.billing_address,
+      o.notes,
+      o.created_at,
+      o.updated_at,
+      COUNT(oi.id) AS item_count,
+      COALESCE(SUM(oi.quantity), 0) AS total_quantity
+    FROM orders o
+    LEFT JOIN coupons c ON c.id = o.coupon_id
+    LEFT JOIN order_items oi ON oi.order_id = o.id
+    WHERE ${whereClause}
+    GROUP BY
+      o.id,
+      o.user_id,
+      o.coupon_id,
+      c.code,
+      o.status,
+      o.subtotal,
+      o.discount_total,
+      o.tax_total,
+      o.total,
+      o.payment_status,
+      o.shipping_address,
+      o.billing_address,
+      o.notes,
+      o.created_at,
+      o.updated_at
+  `;
+}
+
+function buildAdminOrderListQuery({ whereClause }) {
+  return `
+    SELECT
+      o.id,
+      o.user_id,
+      u.id AS customer_id,
+      u.name AS customer_name,
+      u.email AS customer_email,
+      o.coupon_id,
+      c.code AS coupon_code,
+      o.status,
+      o.subtotal,
+      o.discount_total,
+      o.tax_total,
+      o.total,
+      o.payment_status,
+      o.shipping_address,
+      o.billing_address,
+      o.notes,
+      o.created_at,
+      o.updated_at,
+      COUNT(oi.id) AS item_count,
+      COALESCE(SUM(oi.quantity), 0) AS total_quantity
+    FROM orders o
+    INNER JOIN users u ON u.id = o.user_id
+    LEFT JOIN coupons c ON c.id = o.coupon_id
+    LEFT JOIN order_items oi ON oi.order_id = o.id
+    WHERE ${whereClause}
+    GROUP BY
+      o.id,
+      o.user_id,
+      u.id,
+      u.name,
+      u.email,
+      o.coupon_id,
+      c.code,
+      o.status,
+      o.subtotal,
+      o.discount_total,
+      o.tax_total,
+      o.total,
+      o.payment_status,
+      o.shipping_address,
+      o.billing_address,
+      o.notes,
+      o.created_at,
+      o.updated_at
+  `;
+}
+
 export async function listOrdersByUser({ userId, page, limit, status }) {
   const offset = (page - 1) * limit;
   const whereClauses = ['o.user_id = ?'];
@@ -75,48 +176,9 @@ export async function listOrdersByUser({ userId, page, limit, status }) {
   }
 
   const [rows] = await dbPool.query(
-    `
-      SELECT
-        o.id,
-        o.user_id,
-        o.coupon_id,
-        c.code AS coupon_code,
-        o.status,
-        o.subtotal,
-        o.discount_total,
-        o.tax_total,
-        o.total,
-        o.payment_status,
-        o.shipping_address,
-        o.billing_address,
-        o.notes,
-        o.created_at,
-        o.updated_at,
-        COUNT(oi.id) AS item_count,
-        COALESCE(SUM(oi.quantity), 0) AS total_quantity
-      FROM orders o
-      LEFT JOIN coupons c ON c.id = o.coupon_id
-      LEFT JOIN order_items oi ON oi.order_id = o.id
-      WHERE ${whereClauses.join(' AND ')}
-      GROUP BY
-        o.id,
-        o.user_id,
-        o.coupon_id,
-        c.code,
-        o.status,
-        o.subtotal,
-        o.discount_total,
-        o.tax_total,
-        o.total,
-        o.payment_status,
-        o.shipping_address,
-        o.billing_address,
-        o.notes,
-        o.created_at,
-        o.updated_at
-      ORDER BY o.created_at DESC
-      LIMIT ? OFFSET ?
-    `,
+    `${buildUserOrderListQuery({ whereClause: whereClauses.join(' AND ') })}
+     ORDER BY o.created_at DESC
+     LIMIT ? OFFSET ?`,
     [...params, limit, offset],
   );
 
@@ -231,6 +293,174 @@ export async function findOrderByIdForUser(orderId, userId) {
   );
 
   return rows[0] ? mapOrderRow(rows[0]) : null;
+}
+
+export async function listOrdersForAdmin({ page, limit, status, paymentStatus, search }) {
+  const offset = (page - 1) * limit;
+  const whereClauses = ['1 = 1'];
+  const params = [];
+
+  if (status && status !== 'all') {
+    whereClauses.push('o.status = ?');
+    params.push(status);
+  }
+
+  if (paymentStatus && paymentStatus !== 'all') {
+    whereClauses.push('o.payment_status = ?');
+    params.push(paymentStatus);
+  }
+
+  if (search) {
+    whereClauses.push('(CAST(o.id AS CHAR) LIKE ? OR u.name LIKE ? OR u.email LIKE ?)');
+    params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+  }
+
+  const [rows] = await dbPool.query(
+    `${buildAdminOrderListQuery({ whereClause: whereClauses.join(' AND ') })}
+     ORDER BY o.created_at DESC
+     LIMIT ? OFFSET ?`,
+    [...params, limit, offset],
+  );
+
+  return rows.map(mapOrderRow);
+}
+
+export async function countOrdersForAdmin({ status, paymentStatus, search }) {
+  const whereClauses = ['1 = 1'];
+  const params = [];
+
+  if (status && status !== 'all') {
+    whereClauses.push('o.status = ?');
+    params.push(status);
+  }
+
+  if (paymentStatus && paymentStatus !== 'all') {
+    whereClauses.push('o.payment_status = ?');
+    params.push(paymentStatus);
+  }
+
+  if (search) {
+    whereClauses.push('(CAST(o.id AS CHAR) LIKE ? OR u.name LIKE ? OR u.email LIKE ?)');
+    params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+  }
+
+  const [rows] = await dbPool.query(
+    `
+      SELECT COUNT(*) AS total
+      FROM orders o
+      INNER JOIN users u ON u.id = o.user_id
+      WHERE ${whereClauses.join(' AND ')}
+    `,
+    params,
+  );
+
+  return Number(rows[0]?.total || 0);
+}
+
+export async function getOrderMetricsForAdmin() {
+  const [rows] = await dbPool.query(
+    `
+      SELECT
+        COUNT(*) AS total_orders,
+        COALESCE(SUM(CASE WHEN payment_status = 'approved' THEN total ELSE 0 END), 0) AS approved_revenue,
+        COALESCE(SUM(CASE WHEN payment_status = 'pending' THEN 1 ELSE 0 END), 0) AS pending_orders,
+        COALESCE(SUM(CASE WHEN payment_status = 'rejected' THEN 1 ELSE 0 END), 0) AS rejected_orders
+      FROM orders
+    `,
+  );
+
+  const row = rows[0] || {};
+
+  return {
+    totalOrders: Number(row.total_orders || 0),
+    approvedRevenue: Number(row.approved_revenue || 0),
+    pendingOrders: Number(row.pending_orders || 0),
+    rejectedOrders: Number(row.rejected_orders || 0),
+  };
+}
+
+export async function findOrderByIdForAdmin(orderId) {
+  const [rows] = await dbPool.query(
+    `
+      SELECT
+        o.id,
+        o.user_id,
+        u.id AS customer_id,
+        u.name AS customer_name,
+        u.email AS customer_email,
+        o.coupon_id,
+        c.code AS coupon_code,
+        o.status,
+        o.subtotal,
+        o.discount_total,
+        o.tax_total,
+        o.total,
+        o.payment_status,
+        o.shipping_address,
+        o.billing_address,
+        o.notes,
+        o.created_at,
+        o.updated_at,
+        COUNT(oi.id) AS item_count,
+        COALESCE(SUM(oi.quantity), 0) AS total_quantity,
+        ps.id AS payment_record_id,
+        ps.provider_reference,
+        ps.status AS payment_record_status,
+        ps.amount AS payment_amount,
+        ps.currency AS payment_currency,
+        ps.simulated_card_last4,
+        ps.processed_at AS payment_processed_at
+      FROM orders o
+      INNER JOIN users u ON u.id = o.user_id
+      LEFT JOIN coupons c ON c.id = o.coupon_id
+      LEFT JOIN order_items oi ON oi.order_id = o.id
+      LEFT JOIN payments_simulated ps ON ps.order_id = o.id
+      WHERE o.id = ?
+      GROUP BY
+        o.id,
+        o.user_id,
+        u.id,
+        u.name,
+        u.email,
+        o.coupon_id,
+        c.code,
+        o.status,
+        o.subtotal,
+        o.discount_total,
+        o.tax_total,
+        o.total,
+        o.payment_status,
+        o.shipping_address,
+        o.billing_address,
+        o.notes,
+        o.created_at,
+        o.updated_at,
+        ps.id,
+        ps.provider_reference,
+        ps.status,
+        ps.amount,
+        ps.currency,
+        ps.simulated_card_last4,
+        ps.processed_at
+      LIMIT 1
+    `,
+    [orderId],
+  );
+
+  return rows[0] ? mapOrderRow(rows[0]) : null;
+}
+
+export async function updateOrderStatusById(orderId, status, executor = dbPool) {
+  const [result] = await executor.query(
+    `
+      UPDATE orders
+      SET status = ?
+      WHERE id = ?
+    `,
+    [status, orderId],
+  );
+
+  return result.affectedRows;
 }
 
 export async function listOrderItemsByOrderId(orderId) {

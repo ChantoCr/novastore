@@ -5,6 +5,8 @@ import RoleProtectedRoute from '../components/layout/RoleProtectedRoute.jsx';
 import AdminLayout from '../layouts/AdminLayout.jsx';
 import PublicLayout from '../layouts/PublicLayout.jsx';
 import AccountPage from '../pages/AccountPage.jsx';
+import AdminAuditLogsPage from '../pages/AdminAuditLogsPage.jsx';
+import AdminOrdersPage from '../pages/AdminOrdersPage.jsx';
 import AdminProductsPage from '../pages/AdminProductsPage.jsx';
 import CartPage from '../pages/CartPage.jsx';
 import CheckoutPage from '../pages/CheckoutPage.jsx';
@@ -72,6 +74,14 @@ export const router = createBrowserRouter([
       {
         path: 'products',
         element: <AdminProductsPage />,
+      },
+      {
+        path: 'orders',
+        element: <AdminOrdersPage />,
+      },
+      {
+        path: 'audit-logs',
+        element: <AdminAuditLogsPage />,
       },
     ],
   },

@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import { addItem } from '../features/cart/cartSlice.js';
 import { useGetProductByIdentifierQuery } from '../features/products/api/productsApi.js';
+import { addToast } from '../features/ui/uiSlice.js';
 import { formatCurrency } from '../utils/currency.js';
 
 function ProductDetailPage() {
@@ -22,6 +23,13 @@ function ProductDetailPage() {
       addItem({
         product,
         quantity,
+      }),
+    );
+    dispatch(
+      addToast({
+        title: 'Added to cart',
+        message: `${quantity} × ${product.name} added to your cart.`,
+        type: 'success',
       }),
     );
   }

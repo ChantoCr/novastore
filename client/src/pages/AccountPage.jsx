@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 
 import OrderDetailPanel from '../features/orders/components/OrderDetailPanel.jsx';
 import OrderHistoryList from '../features/orders/components/OrderHistoryList.jsx';
@@ -9,9 +10,11 @@ import { formatCurrency } from '../utils/currency.js';
 function AccountPage() {
   const user = useSelector((state) => state.auth.user);
   const role = useSelector((state) => state.auth.role);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const preselectedOrderId = Number(searchParams.get('orderId')) || null;
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [selectedOrderId, setSelectedOrderId] = useState(preselectedOrderId);
 
   const queryParams = useMemo(
     () => ({
@@ -28,14 +31,20 @@ function AccountPage() {
   const summary = data?.data?.summary;
 
   useEffect(() => {
+    if (preselectedOrderId && preselectedOrderId !== selectedOrderId) {
+      setSelectedOrderId(preselectedOrderId);
+    }
+  }, [preselectedOrderId, selectedOrderId]);
+
+  useEffect(() => {
     if (!orders.length) {
-      setSelectedOrderId(null);
+      if (!selectedOrderId) {
+        setSelectedOrderId(null);
+      }
       return;
     }
 
-    const selectedOrderStillVisible = orders.some((order) => order.id === selectedOrderId);
-
-    if (!selectedOrderStillVisible) {
+    if (!selectedOrderId) {
       setSelectedOrderId(orders[0].id);
     }
   }, [orders, selectedOrderId]);
@@ -157,7 +166,14 @@ function AccountPage() {
             <OrderHistoryList
               orders={orders}
               selectedOrderId={selectedOrderId}
-              onSelectOrder={setSelectedOrderId}
+              onSelectOrder={(orderId) => {
+                setSelectedOrderId(orderId);
+                setSearchParams((current) => {
+                  const next = new URLSearchParams(current);
+                  next.set('orderId', String(orderId));
+                  return next;
+                });
+              }}
             />
           ) : null}
 

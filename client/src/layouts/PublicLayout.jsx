@@ -4,6 +4,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useLogoutMutation } from '../features/auth/api/authApi.js';
 import { clearCredentials } from '../features/auth/authSlice.js';
 import { selectCartItemCount } from '../features/cart/cartSlice.js';
+import ToastViewport from '../features/ui/components/ToastViewport.jsx';
 
 function PublicLayout() {
   const dispatch = useDispatch();
@@ -101,6 +102,8 @@ function PublicLayout() {
       <main className="mx-auto max-w-7xl px-6 py-10">
         <Outlet />
       </main>
+
+      <ToastViewport />
     </div>
   );
 }
