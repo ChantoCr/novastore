@@ -39,6 +39,14 @@ export const authApi = baseApi.injectEndpoints({
         method: 'POST',
         body: payload,
       }),
+      async onQueryStarted(_payload, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setCredentials(data.data));
+        } catch {
+          // handled by bootstrap and reauth flows
+        }
+      },
     }),
     logout: builder.mutation({
       query: (payload) => ({

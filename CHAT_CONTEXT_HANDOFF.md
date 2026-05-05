@@ -151,16 +151,19 @@ Created:
 This is the most recent implementation work and should be treated as the current working baseline.
 
 ### Today at a glance
-The work completed today covered four major areas in sequence:
+The work completed today covered six major areas in sequence:
 1. backend auth/product integration test setup and documentation
 2. Phase 4 cart and checkout simulation
 3. Phase 5 order history and account/profile expansion
 4. admin stock-adjustment and audit-log groundwork
+5. auth/session bootstrap persistence across refreshes
+6. checkout-focused backend integration tests
 
 If the next assistant needs the shortest high-value summary before implementation, the biggest current takeaway is:
 - the app now has meaningful authenticated user and admin workflows
-- the biggest remaining UX/architecture gap is auth/session bootstrap persistence across refreshes
-- the next prompt has been updated to target that exact gap
+- auth/session bootstrap persistence now restores valid sessions after refreshes
+- checkout now has dedicated backend integration coverage for totals, coupon usage, payment simulation outcomes, and stock-handling rules
+- the next strongest follow-up work is likely admin audit-log exposure or broader admin/category expansion
 
 ### 1) Role-aware authentication UX is now working
 Implemented:
@@ -401,6 +404,48 @@ Behavior:
 - stock adjustments create stock movement records and reject negative resulting inventory
 - admin product management now surfaces low-stock and zero-stock visibility more clearly in the UI
 
+### 14) Auth/session bootstrap persistence was implemented
+Created:
+- `client/src/features/auth/authStorage.js`
+- `client/src/features/auth/hooks/useAuthBootstrap.js`
+- `client/src/features/auth/components/AuthBootstrapFallback.jsx`
+
+Updated:
+- `client/src/App.jsx`
+- `client/src/app/store.js`
+- `client/src/features/auth/authSlice.js`
+- `client/src/features/auth/api/authApi.js`
+- `client/src/services/baseApi.js`
+- `client/src/components/layout/ProtectedRoute.jsx`
+- `client/src/components/layout/RoleProtectedRoute.jsx`
+- `client/src/layouts/PublicLayout.jsx`
+- `client/src/pages/LoginPage.jsx`
+- `client/src/pages/RegisterPage.jsx`
+- `README.md`
+
+Behavior:
+- the frontend now persists only the refresh token in `sessionStorage` as the minimal bootstrap state
+- app startup attempts a refresh-token bootstrap when a saved session exists and rebuilds the access token plus user state from the backend response
+- protected and role-protected routes now wait for bootstrap completion before redirecting, which prevents refresh-time auth flicker and broken route loops
+- login and register screens now wait for bootstrap completion before rendering, so authenticated users are redirected cleanly after refresh
+- RTK Query reauthentication now skips login/register/refresh/logout 401s, which avoids unnecessary refresh attempts on public auth failures
+
+### 15) Checkout-focused backend integration tests were added
+Created:
+- `server/tests/checkout.test.js`
+- `server/tests/helpers/checkout.js`
+
+Updated:
+- `server/scripts/run-tests.js`
+- `README.md`
+
+Behavior:
+- backend integration coverage now exercises approved, rejected, and pending checkout simulation outcomes
+- approved checkout coverage asserts backend-calculated subtotal, discount, tax, total, order persistence, payment persistence, stock reduction, coupon usage creation, and notification creation
+- rejected and pending checkout coverage asserts that orders and payment records are still created while stock remains unchanged
+- insufficient-stock coverage asserts that checkout fails safely and no order is created for the request notes marker
+- the temporary test fixtures create isolated products and coupons so checkout tests do not rely on mutable seeded catalog inventory
+
 ---
 
 ## Current Demo Credentials
@@ -468,7 +513,12 @@ Completed and passing after the latest work:
 - `npm run lint`
 - `npm run build -w client`
 - `npm run test:run -w client`
+- `npm run lint -w server`
 - selected server-side `node --check` syntax validation
+
+Validation attempted but blocked by the current local environment:
+- `npm run test:server`
+- current failure reason in this environment: database host `mysql` could not be resolved and Docker Desktop was not available, so backend integration tests could not be executed end-to-end here
 
 ---
 
@@ -493,11 +543,12 @@ For manual local MySQL runs:
 DB_HOST=localhost
 ```
 
-### 3) Auth persistence is still basic
-Important limitation:
-- auth state is still primarily Redux memory state
-- role-aware login and routing work
-- longer-term session persistence/bootstrap strategy can still be improved later
+### 3) Auth persistence now supports refresh-safe bootstrap
+Current state:
+- the frontend keeps access tokens in Redux memory only
+- the frontend persists only the refresh token in `sessionStorage` for minimal session restoration
+- app load now attempts backend refresh bootstrap before protected-route redirects run
+- invalid or expired saved auth state is cleared automatically
 
 ### 4) Admin deactivate vs delete behavior
 Current admin UI uses `PATCH` with `isActive` toggling.
@@ -514,26 +565,26 @@ Do not break these patterns:
 ## Recommended Next Task
 The recommended next implementation is:
 
-### Improved auth/session bootstrap persistence
+### Read-only admin audit log listing
 Reason:
-- the app now has deeper authenticated value across account, checkout, orders, and admin flows
-- auth is still primarily Redux memory state, which is the biggest UX/architecture limitation called out in the current notes
-- improving session bootstrap would make refreshes and longer-lived demos feel much more production-like
+- the backend groundwork for audit logging already exists for important admin product actions
+- the admin skill and project phases both call for audit-log visibility as part of a realistic admin workflow
+- exposing audit entries in a protected admin view would turn the existing backend groundwork into a visible portfolio feature
 
 Recommended scope:
-1. bootstrap authenticated user state on app load when tokens exist
-2. handle expired/invalid auth state more gracefully
-3. keep role-aware routing behavior intact during refreshes
-4. avoid introducing unsafe persistence patterns for sensitive data
+1. add a protected backend audit-log listing endpoint with pagination and simple filters
+2. add an admin RTK Query slice or endpoint integration for audit logs
+3. create a read-only admin audit-log page or panel with loading, empty, and error states
+4. keep sensitive metadata exposure intentional and reviewer-friendly
 
 ---
 
 ## Suggested Implementation Priorities After That
-After auth/session bootstrap persistence, the next strong options are:
-1. categories admin CRUD
-2. checkout-focused backend integration tests for coupon and order flows
-3. read-only admin audit log listing
-4. wishlist and reviews groundwork
+With auth/session bootstrap persistence and checkout-focused backend tests now in place, the next strong options are:
+1. read-only admin audit log listing
+2. categories admin CRUD
+3. wishlist and reviews groundwork
+4. frontend auth bootstrap route-behavior tests
 
 ---
 

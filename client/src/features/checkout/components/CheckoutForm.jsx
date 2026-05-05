@@ -55,6 +55,7 @@ function CheckoutForm({ user, onSubmit, isSubmitting }) {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(checkoutFormSchema),
+    shouldUnregister: true,
     defaultValues: {
       shippingAddress: {
         fullName: user?.name || '',

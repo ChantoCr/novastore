@@ -1,15 +1,18 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, Outlet } from 'react-router-dom';
 
-import { clearCredentials } from '../features/auth/authSlice.js';
 import { useLogoutMutation } from '../features/auth/api/authApi.js';
+import { clearCredentials } from '../features/auth/authSlice.js';
 import { selectCartItemCount } from '../features/cart/cartSlice.js';
 
 function PublicLayout() {
   const dispatch = useDispatch();
-  const { isAuthenticated, refreshToken, role, user } = useSelector((state) => state.auth);
+  const { isAuthenticated, refreshToken, role, user, authBootstrapStatus } = useSelector(
+    (state) => state.auth,
+  );
   const cartItemCount = useSelector(selectCartItemCount);
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
+  const isAuthResolving = authBootstrapStatus !== 'complete';
 
   const navItems = [
     { label: 'Home', to: '/' },
@@ -17,7 +20,7 @@ function PublicLayout() {
     { label: `Cart${cartItemCount ? ` (${cartItemCount})` : ''}`, to: '/cart' },
     ...(isAuthenticated ? [{ label: 'Account', to: '/account' }] : []),
     ...(role === 'admin' ? [{ label: 'Admin', to: '/admin/products' }] : []),
-    ...(!isAuthenticated
+    ...(!isAuthenticated && !isAuthResolving
       ? [
           { label: 'Login', to: '/login' },
           { label: 'Register', to: '/register' },
@@ -48,7 +51,13 @@ function PublicLayout() {
           </div>
 
           <div className="flex flex-col gap-3 lg:items-end">
-            {isAuthenticated ? (
+            {isAuthResolving && refreshToken ? (
+              <div className="rounded-full border border-violet-400/20 bg-violet-500/10 px-4 py-2 text-xs uppercase tracking-[0.25em] text-violet-100">
+                Restoring saved session...
+              </div>
+            ) : null}
+
+            {!isAuthResolving && isAuthenticated ? (
               <div className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-xs uppercase tracking-[0.25em] text-emerald-100">
                 Signed in as {user?.name || 'User'} · {role || 'user'}
               </div>
@@ -74,7 +83,7 @@ function PublicLayout() {
                 ))}
               </nav>
 
-              {isAuthenticated ? (
+              {!isAuthResolving && isAuthenticated ? (
                 <button
                   type="button"
                   onClick={handleLogout}

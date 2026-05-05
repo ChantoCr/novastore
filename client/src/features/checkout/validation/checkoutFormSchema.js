@@ -13,7 +13,18 @@ const addressSchema = z.object({
   phone: z.string().trim().max(30).optional(),
 });
 
-const billingAddressSchema = addressSchema.partial().optional();
+const relaxedBillingAddressSchema = z
+  .object({
+    fullName: z.string().trim().max(120).optional().or(z.literal('')),
+    country: z.string().trim().max(120).optional().or(z.literal('')),
+    city: z.string().trim().max(120).optional().or(z.literal('')),
+    line1: z.string().trim().max(180).optional().or(z.literal('')),
+    line2: z.string().trim().max(180).optional().or(z.literal('')),
+    state: z.string().trim().max(120).optional().or(z.literal('')),
+    postalCode: z.string().trim().max(40).optional().or(z.literal('')),
+    phone: z.string().trim().max(30).optional().or(z.literal('')),
+  })
+  .optional();
 
 const paymentMethodSchema = z.object({
   cardholderName: z.string().trim().min(2, 'Enter the cardholder name').max(120),
@@ -36,7 +47,7 @@ export const checkoutFormSchema = z
   .object({
     shippingAddress: addressSchema,
     billingSameAsShipping: z.boolean().default(true),
-    billingAddress: billingAddressSchema,
+    billingAddress: relaxedBillingAddressSchema,
     couponCode: z.string().trim().max(60).optional(),
     notes: z.string().trim().max(2000).optional(),
     paymentMethod: paymentMethodSchema,

@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import authReducer from '../features/auth/authSlice.js';
+import { saveAuthSession } from '../features/auth/authStorage.js';
 import cartReducer from '../features/cart/cartSlice.js';
 import { saveCartState } from '../features/cart/cartStorage.js';
 import { baseApi } from '../services/baseApi.js';
@@ -16,6 +17,16 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
 });
 
+let previousRefreshToken = store.getState().auth.refreshToken;
+
 store.subscribe(() => {
-  saveCartState(store.getState().cart);
+  const state = store.getState();
+  const currentRefreshToken = state.auth.refreshToken;
+
+  saveCartState(state.cart);
+
+  if (currentRefreshToken !== previousRefreshToken) {
+    saveAuthSession({ refreshToken: currentRefreshToken });
+    previousRefreshToken = currentRefreshToken;
+  }
 });

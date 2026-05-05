@@ -3,13 +3,16 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import { useRegisterMutation } from '../features/auth/api/authApi.js';
+import AuthBootstrapFallback from '../features/auth/components/AuthBootstrapFallback.jsx';
 import RegisterForm from '../features/auth/components/RegisterForm.jsx';
 import AuthSection from '../features/auth/components/AuthSection.jsx';
+import { selectIsAuthBootstrapComplete } from '../features/auth/authSlice.js';
 
 function RegisterPage() {
   const navigate = useNavigate();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const role = useSelector((state) => state.auth.role);
+  const isAuthBootstrapComplete = useSelector(selectIsAuthBootstrapComplete);
   const [register, { isLoading, error }] = useRegisterMutation();
 
   const errorMessage = useMemo(() => {
@@ -19,6 +22,15 @@ function RegisterPage() {
 
     return error?.data?.message || 'Registration failed. Check backend setup and demo data.';
   }, [error]);
+
+  if (!isAuthBootstrapComplete) {
+    return (
+      <AuthBootstrapFallback
+        title="Checking for an existing session"
+        description="NOVA Store is restoring any saved session before showing the registration form or redirecting authenticated users."
+      />
+    );
+  }
 
   if (isAuthenticated) {
     return <Navigate to={role === 'admin' ? '/admin/products' : '/account'} replace />;

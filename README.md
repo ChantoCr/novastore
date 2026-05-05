@@ -11,6 +11,7 @@ This repository currently includes:
 - Specialized skill files in `skills/`
 - Base frontend and backend scaffolding
 - Working auth module on frontend and backend
+- Session bootstrap persistence that restores valid auth state after refresh using the existing refresh-token flow
 - Products and categories browsing flows
 - Cart and simulated checkout flow
 - Authenticated account area with order history and order detail view
@@ -19,6 +20,7 @@ This repository currently includes:
 - Backend audit logging for important admin product actions
 - React Hook Form + Zod auth forms
 - Frontend tests for auth form validation and product card rendering
+- Backend integration tests for auth, admin product protection, and checkout business rules
 - Starter Docker setup
 - Starter MySQL schema, migration, and seed files
 - ESLint and Prettier configuration
@@ -193,6 +195,7 @@ nova-store/
 - Helmet and CORS are configured intentionally
 - Checkout totals and stock validation must be calculated on the backend
 - Refresh tokens are hashed in the database and rotated on refresh
+- Frontend auth bootstrap persists only the refresh token in `sessionStorage`, while access tokens are rebuilt from the backend refresh response
 
 ## Local Development
 
@@ -300,6 +303,7 @@ Expected services:
 
 ### Frontend
 - Auth pages: login and register with React Hook Form + Zod
+- Auth bootstrap flow that restores valid sessions on app load and guards protected routes until restoration completes
 - Authenticated account page with order history and order detail panel
 - Product listing page with live category filters
 - Product detail page with add-to-cart actions
@@ -307,7 +311,7 @@ Expected services:
 - Protected checkout page with simulated payment form
 - Admin product management page with dedicated inventory adjustment flow and low-stock visibility
 - RTK Query base API
-- Auth slice, cart slice with local storage persistence, categories API slice, products API slice, checkout API slice, and orders API slice
+- Auth slice with minimal session bootstrap persistence, cart slice with local storage persistence, categories API slice, products API slice, checkout API slice, and orders API slice
 - Protected route and role-protected route components
 
 ## Environment Variables
@@ -431,12 +435,13 @@ Current coverage includes:
 - backend authenticated `/api/auth/me` behavior
 - backend admin product route protection
 - backend product mutation validation failures
+- backend checkout totals, payment simulation outcomes, coupon usage, and stock-handling assertions
 - backend host/Docker-aware test environment support
 
 Planned next coverage includes:
-- backend checkout calculations
-- backend coupon validation
-- backend order creation flow assertions
+- frontend protected-route bootstrap behavior
+- backend order status management flows
+- future admin audit-log endpoint coverage
 
 ## What Makes NOVA Store Different
 This project is intentionally structured to go beyond a beginner e-commerce demo by focusing on:

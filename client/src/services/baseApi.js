@@ -2,6 +2,25 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 import { clearCredentials, setCredentials } from '../features/auth/authSlice.js';
 
+const REAUTH_EXCLUDED_PATHS = new Set([
+  '/auth/login',
+  '/auth/register',
+  '/auth/refresh',
+  '/auth/logout',
+]);
+
+function getRequestUrl(args) {
+  if (typeof args === 'string') {
+    return args;
+  }
+
+  return args?.url || '';
+}
+
+function shouldAttemptReauth(args) {
+  return !REAUTH_EXCLUDED_PATHS.has(getRequestUrl(args));
+}
+
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   prepareHeaders: (headers, { getState }) => {
@@ -18,7 +37,7 @@ const rawBaseQuery = fetchBaseQuery({
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await rawBaseQuery(args, api, extraOptions);
 
-  if (result.error?.status === 401) {
+  if (result.error?.status === 401 && shouldAttemptReauth(args)) {
     const refreshToken = api.getState().auth.refreshToken;
 
     if (refreshToken) {

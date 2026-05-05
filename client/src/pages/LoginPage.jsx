@@ -3,14 +3,17 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import { useLoginMutation } from '../features/auth/api/authApi.js';
+import AuthBootstrapFallback from '../features/auth/components/AuthBootstrapFallback.jsx';
 import LoginForm from '../features/auth/components/LoginForm.jsx';
 import AuthSection from '../features/auth/components/AuthSection.jsx';
+import { selectIsAuthBootstrapComplete } from '../features/auth/authSlice.js';
 
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const role = useSelector((state) => state.auth.role);
+  const isAuthBootstrapComplete = useSelector(selectIsAuthBootstrapComplete);
   const [login, { isLoading, error }] = useLoginMutation();
 
   const errorMessage = useMemo(() => {
@@ -20,6 +23,15 @@ function LoginPage() {
 
     return error?.data?.message || 'Login failed. Check your credentials and API setup.';
   }, [error]);
+
+  if (!isAuthBootstrapComplete) {
+    return (
+      <AuthBootstrapFallback
+        title="Checking for an existing session"
+        description="NOVA Store is restoring any saved session before showing the login form or redirecting you to the correct dashboard."
+      />
+    );
+  }
 
   if (isAuthenticated) {
     return <Navigate to={role === 'admin' ? '/admin/products' : '/account'} replace />;
