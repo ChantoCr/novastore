@@ -151,7 +151,7 @@ Created:
 This is the most recent implementation work and should be treated as the current working baseline.
 
 ### Today at a glance
-The work completed today covered nine major areas in sequence:
+The work completed today covered ten major areas in sequence:
 1. backend auth/product integration test setup and documentation
 2. Phase 4 cart and checkout simulation
 3. Phase 5 order history and account/profile expansion
@@ -161,6 +161,7 @@ The work completed today covered nine major areas in sequence:
 7. checkout UX fixes, demo-card clarity, validation summaries, and add-to-cart toast feedback
 8. admin order visibility, order status controls, and read-only audit-log UI exposure
 9. admin category management across backend, frontend, and test coverage
+10. authenticated wishlist groundwork across backend, frontend, and test coverage
 
 If the next assistant needs the shortest high-value summary before implementation, the biggest current takeaway is:
 - the app now has meaningful authenticated user and admin workflows
@@ -170,7 +171,8 @@ If the next assistant needs the shortest high-value summary before implementatio
 - admins can inspect platform-wide order history with customer and line-item pricing visibility
 - admins can update order fulfillment status and review read-only audit logs for product, category, and order actions
 - admins can now manage categories directly through protected backend and frontend flows
-- the next strongest follow-up work is likely wishlist/reviews groundwork or broader user-facing account features
+- authenticated users can now save and remove products from a protected wishlist flow
+- the next strongest follow-up work is likely reviews groundwork or broader user-facing account features
 
 ### 1) Role-aware authentication UX is now working
 Implemented:
@@ -542,6 +544,38 @@ Behavior:
 - audit-log filtering now includes categories in the admin UI
 - backend integration test coverage now includes category route protection and validation cases
 
+### 19) Wishlist groundwork was implemented
+Created:
+- `server/src/routes/wishlist.routes.js`
+- `server/src/controllers/wishlist.controller.js`
+- `server/src/services/wishlist.service.js`
+- `server/src/repositories/wishlist.repository.js`
+- `server/src/validators/wishlist.validators.js`
+- `client/src/features/wishlist/api/wishlistApi.js`
+- `client/src/features/wishlist/components/WishlistToggleButton.jsx`
+- `client/src/pages/WishlistPage.jsx`
+- `server/tests/wishlist.test.js`
+
+Updated:
+- `server/src/routes/index.js`
+- `server/scripts/run-tests.js`
+- `client/src/services/baseApi.js`
+- `client/src/router/index.jsx`
+- `client/src/layouts/PublicLayout.jsx`
+- `client/src/pages/AccountPage.jsx`
+- `client/src/features/products/components/ProductCard.jsx`
+- `client/src/pages/ProductDetailPage.jsx`
+- `README.md`
+
+Behavior:
+- authenticated users can now browse a protected wishlist page at `/wishlist`
+- public catalog cards and product detail pages now support save/remove wishlist actions
+- guest attempts to save products are redirected toward login with visible toast feedback
+- the backend now protects wishlist list, add, and remove flows with authenticated user ownership enforcement
+- wishlist items are validated against real active products on the backend before insertion
+- the account area now surfaces wishlist item count visibility alongside order metrics
+- backend integration test coverage now includes wishlist route protection, validation, and add/remove behavior
+
 ---
 
 ## Current Demo Credentials
@@ -567,6 +601,7 @@ Public:
 Authenticated:
 - `/account`
 - `/checkout`
+- `/wishlist`
 
 Admin:
 - `/admin/categories`
@@ -594,6 +629,11 @@ Categories:
 
 Checkout:
 - `POST /api/checkout` authenticated simulated checkout
+
+Wishlist:
+- `GET /api/wishlist` authenticated wishlist listing
+- `POST /api/wishlist` authenticated wishlist add
+- `DELETE /api/wishlist/:productId` authenticated wishlist remove
 
 Orders:
 - `GET /api/orders` authenticated order history
@@ -673,26 +713,26 @@ Do not break these patterns:
 ## Recommended Next Task
 The recommended next implementation is:
 
-### Wishlist groundwork
+### Reviews groundwork
 Reason:
-- the project has now covered strong admin-side catalog, stock, orders, auditability, and category management flows
-- the next portfolio gap is a richer user-facing shopping experience beyond cart and checkout
-- the schema already includes `wishlist_items`, so wishlist work can extend the current architecture cleanly without a database redesign
+- wishlist support is now in place, so the next natural user-facing commerce step is product reviews and ratings
+- reviews complement the current product detail, order-history, and future trust-building storefront story
+- the schema already includes `reviews`, which makes this a clean continuation of the current architecture
 
 Recommended scope:
-1. add protected backend wishlist list, add, and remove endpoints with validation
-2. add RTK Query wishlist integration plus user-facing UI actions from product cards and detail views
-3. provide a dedicated wishlist view or account-area panel with loading, empty, and error states
-4. keep the implementation modular so reviews can follow in the same broader phase
+1. add protected backend review creation and listing flows with purchase-aware business rules if feasible in this phase
+2. expose product-level review data in catalog/detail responses or dedicated review endpoints
+3. add frontend review UI on product detail plus user-facing review submission states
+4. keep the implementation modular so moderation or admin review visibility can follow later
 
 ---
 
 ## Suggested Implementation Priorities After That
-With auth/session bootstrap persistence, checkout-focused backend tests, admin order controls, audit-log visibility, and admin category management now in place, the next strong options are:
-1. wishlist groundwork
-2. reviews groundwork
-3. frontend auth bootstrap route-behavior tests
-4. image upload groundwork
+With auth/session bootstrap persistence, checkout-focused backend tests, admin order controls, audit-log visibility, admin category management, and wishlist groundwork now in place, the next strong options are:
+1. reviews groundwork
+2. frontend auth bootstrap route-behavior tests
+3. image upload groundwork
+4. notification center visibility
 
 ---
 

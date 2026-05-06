@@ -19,7 +19,7 @@ function PublicLayout() {
     { label: 'Home', to: '/' },
     { label: 'Products', to: '/products' },
     { label: `Cart${cartItemCount ? ` (${cartItemCount})` : ''}`, to: '/cart' },
-    ...(isAuthenticated ? [{ label: 'Account', to: '/account' }] : []),
+    ...(isAuthenticated ? [{ label: 'Wishlist', to: '/wishlist' }, { label: 'Account', to: '/account' }] : []),
     ...(role === 'admin' ? [{ label: 'Admin', to: '/admin/products' }] : []),
     ...(!isAuthenticated && !isAuthResolving
       ? [

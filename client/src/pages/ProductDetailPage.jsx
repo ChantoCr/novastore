@@ -5,6 +5,7 @@ import { Link, useParams } from 'react-router-dom';
 import { addItem } from '../features/cart/cartSlice.js';
 import { useGetProductByIdentifierQuery } from '../features/products/api/productsApi.js';
 import { addToast } from '../features/ui/uiSlice.js';
+import WishlistToggleButton from '../features/wishlist/components/WishlistToggleButton.jsx';
 import { formatCurrency } from '../utils/currency.js';
 
 function ProductDetailPage() {
@@ -126,6 +127,8 @@ function ProductDetailPage() {
                 Add to cart
               </button>
 
+              <WishlistToggleButton product={product} className="px-5 py-3 font-medium" />
+
               <Link
                 to="/cart"
                 className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-100 transition hover:border-violet-400/30"
@@ -135,8 +138,8 @@ function ProductDetailPage() {
             </div>
 
             <div className="rounded-3xl border border-emerald-400/20 bg-emerald-500/10 p-5 text-sm leading-6 text-emerald-100">
-              Cart and checkout simulation are now available. Reviews and wishlist will still arrive in later
-              phases.
+              Cart, wishlist, and checkout simulation are now available so shoppers can either save items
+              for later or move directly into purchase flow testing.
             </div>
           </div>
         </div>

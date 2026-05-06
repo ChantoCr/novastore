@@ -42,7 +42,7 @@ Before implementing new features, check whether the current need is:
   - auth/session bootstrap persistence across refreshes
   - products and categories
   - cart and checkout simulation with clearer result UX and add-to-cart toast feedback
-  - authenticated order history and order detail
+  - authenticated order history, wishlist visibility, and a protected wishlist page
   - admin category management
   - admin product management UI
   - admin stock adjustment flow
@@ -52,5 +52,5 @@ Before implementing new features, check whether the current need is:
 - Docker is working now and should be treated as the default local run path unless the user asks for manual MySQL help.
 - If a Docker-only dependency import error appears, check stale named `node_modules` volumes first, then restart containers or use `docker compose down -v`.
 - For manual local MySQL runs, verify whether `.env` uses `DB_HOST=localhost`.
-- The current next implementation target is wishlist groundwork, and the latest details are in `CHAT_CONTEXT_HANDOFF.md` and `NEXT_TASK_PROMPT.md`.
+- The current next implementation target is reviews groundwork, and the latest details are in `CHAT_CONTEXT_HANDOFF.md` and `NEXT_TASK_PROMPT.md`.
 - Do not skip the required `.md` files above; they now contain the latest phase progression and handoff details needed to continue correctly.

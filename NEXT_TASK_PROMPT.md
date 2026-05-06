@@ -1,33 +1,33 @@
 # Next Task Prompt — NOVA Store
 
 ## Objective
-Implement wishlist groundwork for authenticated users across the existing catalog architecture.
+Implement reviews groundwork for authenticated users within the current product and order architecture.
 
 ## Why
-The repository already supports product browsing, cart flows, checkout simulation, order history, and a solid admin back office. The next strong user-facing gap is wishlist support so shoppers can save products without committing them to the cart immediately.
+The repository now supports product browsing, cart and checkout simulation, order history, admin catalog management, and wishlist saving. The next strong commerce layer is product reviews so shoppers can leave feedback and future reviewers can see trust signals on product detail pages.
 
 This task matters because it will:
-- extend the shopping journey beyond immediate purchase intent
-- use the existing `wishlist_items` schema in a realistic way
-- strengthen the account-area and product-experience story
+- enrich product-detail experience with user-generated feedback
+- connect the shopping flow to post-purchase behavior
+- strengthen the portfolio story around business rules and relational data
 - align naturally with the planned wishlist and reviews phase
 
 ## Scope
 Include:
-1. protected backend wishlist list, add, and remove flows
-2. validation for wishlist payloads where relevant
-3. RTK Query wishlist integration on the frontend
-4. user-facing wishlist UI actions from product cards, product detail, and/or a dedicated wishlist view
+1. backend review listing and creation flows
+2. validation for review payloads
+3. purchase-aware restrictions if feasible with the current order schema
+4. frontend review UI on product detail and/or account-adjacent flows
 5. loading, empty, error, and success states where relevant
 6. documentation updates if routes, architecture notes, or capabilities change
 
 ## Out of Scope
 Do not include yet:
-- a full reviews system unless absolutely necessary
-- major cart or checkout rewrites unrelated to wishlist behavior
-- guest wishlist persistence across devices
-- complex recommendation logic
-- broad account dashboard redesign unrelated to wishlist support
+- a complex moderation dashboard unless clearly needed
+- broad redesigns of the product catalog unrelated to reviews
+- fake frontend-only purchase checks
+- advanced rating analytics
+- unrelated image-upload or notification work unless absolutely necessary
 
 ## Files / Areas Likely Involved
 - `server/src/routes/`
@@ -35,33 +35,31 @@ Do not include yet:
 - `server/src/services/`
 - `server/src/repositories/`
 - `server/src/validators/`
-- `client/src/features/wishlist/`
-- `client/src/features/products/`
+- `client/src/features/reviews/`
 - `client/src/pages/`
-- `client/src/router/index.jsx`
-- `client/src/services/baseApi.js`
+- `client/src/features/products/`
 - `README.md`
 - `CHAT_CONTEXT_HANDOFF.md`
 
 ## Acceptance Criteria
-- [ ] Authenticated wishlist backend routes exist
-- [ ] Wishlist add/remove behavior is protected on the backend
-- [ ] Frontend wishlist data flow uses RTK Query cleanly
-- [ ] Users can save and remove products from a visible wishlist UI
+- [ ] Backend review routes exist for relevant product/user flows
+- [ ] Review creation is protected on the backend
+- [ ] Validation protects review payloads
+- [ ] Frontend exposes review listing and submission UI cleanly
 - [ ] Loading, empty, error, and success states are present where relevant
 - [ ] Documentation stays aligned if routes or capabilities change
 
 ## Constraints / Preferences
 - keep the layered backend architecture intact
 - keep the frontend feature-based and RTK Query based
-- prefer explicit wishlist state handling over clever abstractions
-- do not trust product ownership or user identity from the frontend
+- prefer explicit review business rules over clever abstractions
+- do not trust purchase eligibility from the frontend
 - assume Docker is available when the environment supports it, but treat this as feature development work
 
 ## Notes
 Current important context:
 - auth/session bootstrap persistence is implemented
-- checkout flow has clearer UX, result states, and add-to-cart toast feedback
-- admins can manage categories and products, inspect platform-wide orders, update order statuses, and review read-only audit logs
-- category management is now in place, so the next strong user-facing phase gap is wishlist support
+- checkout flow, order history, category management, and wishlist groundwork are already in place
+- product detail pages now support add-to-cart and wishlist actions
+- the next strong user-facing commerce gap is reviews and ratings
 - read `NEXT_CHAT_INSTRUCTIONS.md` first in the next chat before making changes

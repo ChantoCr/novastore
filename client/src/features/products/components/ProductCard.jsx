@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { addItem } from '../../cart/cartSlice.js';
 import { addToast } from '../../ui/uiSlice.js';
+import WishlistToggleButton from '../../wishlist/components/WishlistToggleButton.jsx';
 import { formatCurrency } from '../../../utils/currency.js';
 
 function ProductCard({ product }) {
@@ -72,6 +73,7 @@ function ProductCard({ product }) {
             >
               Add to cart
             </button>
+            <WishlistToggleButton product={product} />
             <Link
               to={`/products/${product.slug || product.id}`}
               className="rounded-full border border-violet-400/30 bg-violet-500/10 px-4 py-2 text-violet-200 transition hover:bg-violet-500/20"

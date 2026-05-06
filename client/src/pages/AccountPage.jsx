@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 import OrderDetailPanel from '../features/orders/components/OrderDetailPanel.jsx';
 import OrderHistoryList from '../features/orders/components/OrderHistoryList.jsx';
 import { useGetMyOrderByIdQuery, useGetMyOrdersQuery } from '../features/orders/api/ordersApi.js';
+import { useGetWishlistQuery } from '../features/wishlist/api/wishlistApi.js';
 import { formatCurrency } from '../utils/currency.js';
 
 function AccountPage() {
@@ -26,9 +27,11 @@ function AccountPage() {
   );
 
   const { data, isLoading, isError, error } = useGetMyOrdersQuery(queryParams);
+  const { data: wishlistResponse } = useGetWishlistQuery();
   const orders = useMemo(() => data?.data?.items || [], [data]);
   const pagination = data?.data?.pagination;
   const summary = data?.data?.summary;
+  const wishlistSummary = wishlistResponse?.data?.summary;
 
   useEffect(() => {
     if (preselectedOrderId && preselectedOrderId !== selectedOrderId) {
@@ -95,7 +98,7 @@ function AccountPage() {
         </article>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <article className="rounded-3xl border border-white/10 bg-white/5 p-5">
           <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Total orders</p>
           <p className="mt-3 text-2xl font-semibold text-white">{summary?.totalOrders ?? '—'}</p>
@@ -116,6 +119,14 @@ function AccountPage() {
           <p className="mt-3 text-2xl font-semibold text-white">
             {summary ? formatCurrency(summary.totalSpent) : '—'}
           </p>
+        </article>
+
+        <article className="rounded-3xl border border-white/10 bg-slate-950/60 p-5">
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Wishlist items</p>
+          <p className="mt-3 text-2xl font-semibold text-white">{wishlistSummary?.itemCount ?? '—'}</p>
+          <Link to="/wishlist" className="mt-3 inline-flex text-sm text-violet-300 hover:text-violet-200">
+            View wishlist →
+          </Link>
         </article>
       </div>
 

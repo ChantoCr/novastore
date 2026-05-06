@@ -16,6 +16,7 @@ import LoginPage from '../pages/LoginPage.jsx';
 import ProductDetailPage from '../pages/ProductDetailPage.jsx';
 import ProductsPage from '../pages/ProductsPage.jsx';
 import RegisterPage from '../pages/RegisterPage.jsx';
+import WishlistPage from '../pages/WishlistPage.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -59,6 +60,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AccountPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'wishlist',
+        element: (
+          <ProtectedRoute>
+            <WishlistPage />
           </ProtectedRoute>
         ),
       },

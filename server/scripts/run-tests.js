@@ -4,6 +4,7 @@ const testFiles = [
   './tests/auth.test.js',
   './tests/product.test.js',
   './tests/category.test.js',
+  './tests/wishlist.test.js',
   './tests/checkout.test.js',
 ];
 
