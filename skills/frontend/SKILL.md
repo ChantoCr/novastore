@@ -91,6 +91,8 @@ client/src/
 - Prevent duplicate submissions on forms.
 - Surface validation messages clearly.
 - Use optimistic UI only when rollback behavior is understood.
+- Important result states such as checkout approval, rejection, or pending should be visually distinct and understandable.
+- Small feedback moments like add-to-cart confirmation can use lightweight toast-style UI when it improves clarity.
 
 ## Avoid
 - Overloaded components.
@@ -98,3 +100,4 @@ client/src/
 - Inline styles unless necessary.
 - API calls directly inside deeply nested components.
 - Mixing admin UI patterns into public user flows without clear separation.
+- Silent form failures with no visible validation or submit feedback.

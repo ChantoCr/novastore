@@ -15,16 +15,18 @@ This repository currently includes:
 - Products and categories browsing flows
 - Cart and simulated checkout flow
 - Authenticated account area with order history and order detail view
-- Improved checkout result UX with direct order follow-up into account history
+- Improved checkout result UX with animated status feedback, order summary, and direct order follow-up into account history
+- Admin category management UI for protected catalog taxonomy control
 - Admin product management UI for role-protected catalog editing
 - Admin order history view with customer, item-price, and payment visibility
 - Admin order status update controls with backend audit logging
-- Read-only admin audit log screen for product and order administration events
+- Read-only admin audit log screen for product, category, and order administration events
 - Admin inventory adjustment flow with stock movement tracking
-- Backend audit logging for important admin product actions
+- Backend audit logging for important admin product, category, and order actions
 - React Hook Form + Zod auth forms
+- Add-to-cart toast feedback for catalog and product-detail flows
 - Frontend tests for auth form validation and product card rendering
-- Backend integration tests for auth, admin product protection, and checkout business rules
+- Backend integration tests for auth, admin product/category protection, and checkout business rules
 - Starter Docker setup
 - Starter MySQL schema, migration, and seed files
 - ESLint and Prettier configuration
@@ -287,6 +289,7 @@ Expected services:
 - Server: `http://localhost:5000`
 - API health route: `http://localhost:5000/api/health`
 - Categories route: `http://localhost:5000/api/categories`
+- Admin categories route: `http://localhost:5000/api/categories/manage`
 - Products route: `http://localhost:5000/api/products`
 - Admin products route: `http://localhost:5000/api/products/manage`
 - MySQL: `localhost:3306`
@@ -295,11 +298,11 @@ Expected services:
 
 ### Backend
 - Auth routes: register, login, refresh, logout, me
-- Categories route: list active categories
+- Categories routes: public active listing plus admin managed listing, create, and update flows
 - Product routes: public list, detail, admin managed list, create, update, soft delete, and dedicated stock adjustment
 - Checkout route: protected simulated checkout with backend total calculation, coupon validation, payment simulation, order creation, notification creation, and stock reduction on approved payments
 - Order routes: authenticated order history and owner-only order detail access, plus admin-wide order listing, order detail inspection, and admin status updates
-- Audit logging for important admin product and order actions
+- Audit logging for important admin product, category, and order actions
 - Admin audit-log listing route for protected read-only traceability
 - Validation middleware
 - JWT auth middleware
@@ -313,12 +316,13 @@ Expected services:
 - Product listing page with live category filters
 - Product detail page with add-to-cart actions
 - Cart page with local Redux state and quantity management
-- Protected checkout page with simulated payment form
+- Protected checkout page with simulated payment form, validation summary, and animated result states
+- Admin categories page for listing, creating, editing, and toggling category visibility
 - Admin product management page with dedicated inventory adjustment flow and low-stock visibility
 - Admin orders page for viewing customer order history, item prices, totals, payment simulation metadata, and status updates
-- Admin audit logs page for reviewing protected product and order action history
+- Admin audit logs page for reviewing protected product, category, and order action history
 - RTK Query base API
-- Auth slice with minimal session bootstrap persistence, cart slice with local storage persistence, categories API slice, products API slice, checkout API slice, and orders API slice
+- Auth slice with minimal session bootstrap persistence, cart slice with local storage persistence, a lightweight UI slice for toast feedback, categories API slice with public/admin category management, products API slice, checkout API slice, orders API slice, and admin audit-log API integration
 - Protected route and role-protected route components
 
 ## Environment Variables
@@ -441,14 +445,17 @@ Current coverage includes:
 - backend auth login success and failure
 - backend authenticated `/api/auth/me` behavior
 - backend admin product route protection
+- backend admin category route protection
 - backend product mutation validation failures
+- backend category mutation validation failures
 - backend checkout totals, payment simulation outcomes, coupon usage, and stock-handling assertions
 - backend host/Docker-aware test environment support
 
 Planned next coverage includes:
 - frontend protected-route bootstrap behavior
-- backend order status management flows
-- future admin audit-log endpoint coverage
+- backend admin order status management flows
+- backend admin audit-log access restrictions
+- future checkout form interaction and result-state UI coverage
 
 ## What Makes NOVA Store Different
 This project is intentionally structured to go beyond a beginner e-commerce demo by focusing on:
@@ -465,6 +472,7 @@ Add screenshots here as implementation progresses:
 - Product listing
 - Product detail
 - Account page
+- Admin categories page
 - Admin products page
 
 ## Roadmap / Future Improvements

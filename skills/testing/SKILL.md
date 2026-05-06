@@ -40,6 +40,7 @@ Test:
 3. Stock validation
 4. Order creation flow
 5. Admin restrictions
+6. Admin order status update rules and audit-log access restrictions
 
 ## Avoid
 - Testing only visual rendering.

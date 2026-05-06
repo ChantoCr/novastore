@@ -25,6 +25,7 @@ router.get('/', (_req, res) => {
         '/api/health',
         '/api/health/db',
         '/api/categories',
+        '/api/categories/manage',
         '/api/checkout',
         '/api/orders',
         '/api/orders/:orderId',

@@ -6,6 +6,7 @@ import AdminLayout from '../layouts/AdminLayout.jsx';
 import PublicLayout from '../layouts/PublicLayout.jsx';
 import AccountPage from '../pages/AccountPage.jsx';
 import AdminAuditLogsPage from '../pages/AdminAuditLogsPage.jsx';
+import AdminCategoriesPage from '../pages/AdminCategoriesPage.jsx';
 import AdminOrdersPage from '../pages/AdminOrdersPage.jsx';
 import AdminProductsPage from '../pages/AdminProductsPage.jsx';
 import CartPage from '../pages/CartPage.jsx';
@@ -71,6 +72,10 @@ export const router = createBrowserRouter([
       </RoleProtectedRoute>
     ),
     children: [
+      {
+        path: 'categories',
+        element: <AdminCategoriesPage />,
+      },
       {
         path: 'products',
         element: <AdminProductsPage />,

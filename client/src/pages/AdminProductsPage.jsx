@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import AdminProductForm from '../features/admin/components/AdminProductForm.jsx';
 import AdminProductsTable from '../features/admin/components/AdminProductsTable.jsx';
 import AdminStockAdjustmentForm from '../features/admin/components/AdminStockAdjustmentForm.jsx';
-import { useGetCategoriesQuery } from '../features/categories/api/categoriesApi.js';
+import { useGetManagedCategoriesQuery } from '../features/categories/api/categoriesApi.js';
 import {
   useAdjustProductStockMutation,
   useCreateProductMutation,
@@ -36,7 +36,7 @@ function AdminProductsPage() {
   );
 
   const { data, isLoading, isError, error } = useGetManagedProductsQuery(queryParams);
-  const { data: categoriesResponse } = useGetCategoriesQuery();
+  const { data: categoriesResponse } = useGetManagedCategoriesQuery();
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const [adjustProductStock, { isLoading: isAdjustingStock }] = useAdjustProductStockMutation();
@@ -216,6 +216,7 @@ function AdminProductsPage() {
             {categories.map((category) => (
               <option key={category.id} value={category.slug}>
                 {category.name}
+                {category.isActive ? '' : ' (inactive)'}
               </option>
             ))}
           </select>

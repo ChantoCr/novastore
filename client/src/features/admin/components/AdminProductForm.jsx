@@ -54,6 +54,7 @@ function AdminProductForm({ categories = [], isSubmitting = false, onCancel, onS
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
+                {category.isActive ? '' : ' (inactive)'}
               </option>
             ))}
           </select>

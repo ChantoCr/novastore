@@ -33,6 +33,8 @@ Show:
 - Admin UI should be clean and dashboard-like.
 - Use tables, cards, filters, and search.
 - Show confirmation for sensitive actions.
+- Admin order status changes should be explicit, constrained, and audit logged.
+- Audit log screens should be read-only unless a future requirement says otherwise.
 
 ## Suggested Admin Modules
 - Dashboard
@@ -42,6 +44,11 @@ Show:
 - Coupons
 - Audit Logs
 - Settings (optional later)
+
+## Order Management Notes
+- Admins should be able to inspect any order, customer identity, item-level pricing, totals, and payment metadata.
+- Status updates should be handled with controlled options, not free-form editing.
+- Important order state changes should appear in audit logs.
 
 ## Avoid
 - Giving admin powers to normal users.

@@ -42,6 +42,7 @@ A fullstack e-commerce platform focused on secure authentication, role-based acc
 - Update documentation when architecture changes.
 - Prefer examples over vague explanations.
 - Write for both recruiters and technical reviewers.
+- When the working baseline changes meaningfully, update handoff-oriented files such as `CHAT_CONTEXT_HANDOFF.md`, `NEXT_CHAT_INSTRUCTIONS.md`, and `NEXT_TASK_PROMPT.md`.
 
 ## Avoid
 - Empty README.

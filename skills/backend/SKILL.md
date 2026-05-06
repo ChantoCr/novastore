@@ -88,9 +88,9 @@ For errors:
 ## Service Responsibilities
 - Auth service manages credentials, token issuance, refresh rotation, and logout.
 - Product service manages catalog rules, stock checks, and activation status.
-- Order service calculates totals on the backend and creates order records.
+- Order service calculates totals on the backend, creates order records, and handles controlled admin status updates.
 - Coupon service validates applicability, expiry, and usage limits.
-- Audit service records important admin actions.
+- Audit service records important admin actions and serves protected read-only audit listing data.
 
 ## Error Handling Expectations
 - Convert database and validation failures into safe API responses.
@@ -105,3 +105,4 @@ For errors:
 - Unvalidated request bodies.
 - Silent errors.
 - Trusting prices, totals, or roles sent by the frontend.
+- Exposing unrestricted admin audit data without authentication and role checks.

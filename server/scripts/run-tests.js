@@ -1,6 +1,11 @@
 import { spawn } from 'node:child_process';
 
-const testFiles = ['./tests/auth.test.js', './tests/product.test.js', './tests/checkout.test.js'];
+const testFiles = [
+  './tests/auth.test.js',
+  './tests/product.test.js',
+  './tests/category.test.js',
+  './tests/checkout.test.js',
+];
 
 const child = spawn(process.execPath, ['--test', ...testFiles], {
   stdio: 'inherit',

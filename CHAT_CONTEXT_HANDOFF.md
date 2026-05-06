@@ -151,22 +151,26 @@ Created:
 This is the most recent implementation work and should be treated as the current working baseline.
 
 ### Today at a glance
-The work completed today covered six major areas in sequence:
+The work completed today covered nine major areas in sequence:
 1. backend auth/product integration test setup and documentation
 2. Phase 4 cart and checkout simulation
 3. Phase 5 order history and account/profile expansion
 4. admin stock-adjustment and audit-log groundwork
 5. auth/session bootstrap persistence across refreshes
 6. checkout-focused backend integration tests
+7. checkout UX fixes, demo-card clarity, validation summaries, and add-to-cart toast feedback
+8. admin order visibility, order status controls, and read-only audit-log UI exposure
+9. admin category management across backend, frontend, and test coverage
 
 If the next assistant needs the shortest high-value summary before implementation, the biggest current takeaway is:
 - the app now has meaningful authenticated user and admin workflows
 - auth/session bootstrap persistence now restores valid sessions after refreshes
 - checkout now has dedicated backend integration coverage for totals, coupon usage, payment simulation outcomes, and stock-handling rules
-- checkout result UX now includes a direct account-order follow-up path
-- admins can now inspect platform-wide order history with customer and line-item pricing visibility
-- admins can now update order fulfillment status and review read-only audit logs for product and order actions
-- the next strongest follow-up work is likely broader admin/category expansion or image/audit refinement
+- checkout UX is much clearer now, including result states, order follow-up, validation summaries, and add-to-cart popups
+- admins can inspect platform-wide order history with customer and line-item pricing visibility
+- admins can update order fulfillment status and review read-only audit logs for product, category, and order actions
+- admins can now manage categories directly through protected backend and frontend flows
+- the next strongest follow-up work is likely wishlist/reviews groundwork or broader user-facing account features
 
 ### 1) Role-aware authentication UX is now working
 Implemented:
@@ -449,6 +453,95 @@ Behavior:
 - insufficient-stock coverage asserts that checkout fails safely and no order is created for the request notes marker
 - the temporary test fixtures create isolated products and coupons so checkout tests do not rely on mutable seeded catalog inventory
 
+### 16) Checkout UX fixes and cart feedback were implemented
+Created:
+- `client/src/features/ui/uiSlice.js`
+- `client/src/features/ui/components/ToastViewport.jsx`
+
+Updated:
+- `client/src/features/checkout/components/CheckoutForm.jsx`
+- `client/src/features/checkout/validation/checkoutFormSchema.js`
+- `client/src/pages/CheckoutPage.jsx`
+- `client/src/features/products/components/ProductCard.jsx`
+- `client/src/pages/ProductDetailPage.jsx`
+- `client/src/layouts/PublicLayout.jsx`
+- `client/src/app/store.js`
+
+Behavior:
+- hidden billing-address validation was fixed so checkout no longer appears to do nothing when billing matches shipping
+- checkout form now shows a visible validation summary and server submit-error summary
+- quick-fill demo card buttons now make approved, rejected, and pending scenarios explicit
+- checkout result states are now clearer, and cart clearing only happens on approved payments
+- lightweight toast popups now confirm when products are added to the cart from catalog and detail views
+
+### 17) Admin order controls and audit-log visibility were implemented
+Created:
+- `server/src/routes/audit.routes.js`
+- `server/src/controllers/audit.controller.js`
+- `server/src/services/audit.service.js`
+- `server/src/validators/audit.validators.js`
+- `client/src/pages/AdminOrdersPage.jsx`
+- `client/src/pages/AdminAuditLogsPage.jsx`
+- `client/src/features/admin/api/auditLogsApi.js`
+- `client/src/features/admin/components/AdminOrderStatusForm.jsx`
+
+Updated:
+- `server/src/repositories/audit.repository.js`
+- `server/src/repositories/order.repository.js`
+- `server/src/services/order.service.js`
+- `server/src/controllers/order.controller.js`
+- `server/src/routes/order.routes.js`
+- `server/src/validators/order.validators.js`
+- `server/src/routes/index.js`
+- `client/src/features/orders/api/ordersApi.js`
+- `client/src/features/orders/components/OrderHistoryList.jsx`
+- `client/src/features/orders/components/OrderDetailPanel.jsx`
+- `client/src/router/index.jsx`
+- `client/src/layouts/AdminLayout.jsx`
+- `client/src/pages/CheckoutPage.jsx`
+- `README.md`
+
+Behavior:
+- admins can now browse platform-wide order history at `/admin/orders`
+- admins can inspect customer identity, purchased items, unit prices, line totals, totals, coupon data, and payment simulation metadata
+- admins can update order fulfillment status through a controlled admin form
+- admin order status changes now create audit log records on the backend
+- admins can review protected read-only audit logs at `/admin/audit-logs`
+- checkout result cards now include stronger visual states, animated status icons, and direct order follow-up into account history
+
+### 18) Admin category management was implemented
+Created:
+- `server/src/validators/category.validators.js`
+- `client/src/features/admin/components/AdminCategoryForm.jsx`
+- `client/src/features/admin/components/AdminCategoriesTable.jsx`
+- `client/src/features/admin/validation/categoryFormSchema.js`
+- `client/src/pages/AdminCategoriesPage.jsx`
+- `server/tests/category.test.js`
+
+Updated:
+- `server/src/routes/category.routes.js`
+- `server/src/controllers/category.controller.js`
+- `server/src/services/category.service.js`
+- `server/src/repositories/category.repository.js`
+- `server/src/routes/index.js`
+- `server/scripts/run-tests.js`
+- `client/src/features/categories/api/categoriesApi.js`
+- `client/src/router/index.jsx`
+- `client/src/layouts/AdminLayout.jsx`
+- `client/src/pages/AdminProductsPage.jsx`
+- `client/src/features/admin/components/AdminProductForm.jsx`
+- `client/src/pages/AdminAuditLogsPage.jsx`
+- `README.md`
+
+Behavior:
+- admins can now browse categories at `/admin/categories`
+- the backend now supports protected category managed listing, create, and update flows
+- category payloads are validated on both backend and frontend before mutation submission
+- category create, update, and visibility-toggle actions now create audit log records with `category` entity types
+- admin product management now consumes the managed category list so inactive categories remain visible to admins when assigning catalog products
+- audit-log filtering now includes categories in the admin UI
+- backend integration test coverage now includes category route protection and validation cases
+
 ---
 
 ## Current Demo Credentials
@@ -476,6 +569,7 @@ Authenticated:
 - `/checkout`
 
 Admin:
+- `/admin/categories`
 - `/admin/products`
 - `/admin/orders`
 - `/admin/audit-logs`
@@ -494,6 +588,9 @@ Auth:
 
 Categories:
 - `GET /api/categories`
+- `GET /api/categories/manage` admin-only managed listing
+- `POST /api/categories` admin-only category creation
+- `PATCH /api/categories/:categoryIdOrSlug` admin-only category update
 
 Checkout:
 - `POST /api/checkout` authenticated simulated checkout
@@ -576,26 +673,26 @@ Do not break these patterns:
 ## Recommended Next Task
 The recommended next implementation is:
 
-### Read-only admin audit log listing
+### Wishlist groundwork
 Reason:
-- the backend groundwork for audit logging already exists for important admin product actions
-- the admin skill and project phases both call for audit-log visibility as part of a realistic admin workflow
-- exposing audit entries in a protected admin view would turn the existing backend groundwork into a visible portfolio feature
+- the project has now covered strong admin-side catalog, stock, orders, auditability, and category management flows
+- the next portfolio gap is a richer user-facing shopping experience beyond cart and checkout
+- the schema already includes `wishlist_items`, so wishlist work can extend the current architecture cleanly without a database redesign
 
 Recommended scope:
-1. add a protected backend audit-log listing endpoint with pagination and simple filters
-2. add an admin RTK Query slice or endpoint integration for audit logs
-3. create a read-only admin audit-log page or panel with loading, empty, and error states
-4. keep sensitive metadata exposure intentional and reviewer-friendly
+1. add protected backend wishlist list, add, and remove endpoints with validation
+2. add RTK Query wishlist integration plus user-facing UI actions from product cards and detail views
+3. provide a dedicated wishlist view or account-area panel with loading, empty, and error states
+4. keep the implementation modular so reviews can follow in the same broader phase
 
 ---
 
 ## Suggested Implementation Priorities After That
-With auth/session bootstrap persistence and checkout-focused backend tests now in place, the next strong options are:
-1. read-only admin audit log listing
-2. categories admin CRUD
-3. wishlist and reviews groundwork
-4. frontend auth bootstrap route-behavior tests
+With auth/session bootstrap persistence, checkout-focused backend tests, admin order controls, audit-log visibility, and admin category management now in place, the next strong options are:
+1. wishlist groundwork
+2. reviews groundwork
+3. frontend auth bootstrap route-behavior tests
+4. image upload groundwork
 
 ---
 

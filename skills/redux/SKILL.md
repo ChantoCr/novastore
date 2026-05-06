@@ -18,6 +18,10 @@ filtersSlice
 notificationsSlice
 ```
 
+Notes:
+- `uiSlice` can be used for lightweight client-only feedback such as toast notifications and temporary interface state.
+- Persist only what is safe and necessary; feedback UI state generally should not be persisted across sessions.
+
 ## RTK Query APIs
 
 ```txt

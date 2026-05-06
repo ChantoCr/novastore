@@ -97,6 +97,7 @@ function AdminAuditLogsPage() {
           >
             <option value="all">All entities</option>
             <option value="product">Product</option>
+            <option value="category">Category</option>
             <option value="order">Order</option>
             <option value="coupon">Coupon</option>
           </select>

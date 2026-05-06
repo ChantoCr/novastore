@@ -198,6 +198,8 @@ Can:
 - Manage stock
 - View users
 - View orders
+- View order detail with item-level pricing and payment metadata
+- Update order fulfillment status
 - Manage coupons
 - View audit logs
 - View metrics
@@ -239,6 +241,7 @@ Can:
 - User order history
 - Order detail
 - Admin order list
+- Admin order detail
 - Order status management
 
 ### 5. Admin Dashboard
@@ -288,6 +291,7 @@ Track important admin actions:
 - Stock changed
 - Coupon created
 - Order status changed
+- Audit log listing should be protected and read-only by default
 
 ### 12. Testing
 - Backend unit tests
