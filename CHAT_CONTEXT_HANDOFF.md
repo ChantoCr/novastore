@@ -151,7 +151,7 @@ Created:
 This is the most recent implementation work and should be treated as the current working baseline.
 
 ### Today at a glance
-The work completed today covered ten major areas in sequence:
+The work completed today covered twelve major areas in sequence:
 1. backend auth/product integration test setup and documentation
 2. Phase 4 cart and checkout simulation
 3. Phase 5 order history and account/profile expansion
@@ -162,6 +162,8 @@ The work completed today covered ten major areas in sequence:
 8. admin order visibility, order status controls, and read-only audit-log UI exposure
 9. admin category management across backend, frontend, and test coverage
 10. authenticated wishlist groundwork across backend, frontend, and test coverage
+11. Phase 9 and Phase 10 groundwork through coupon management, advanced catalog filters, and notification visibility
+12. image upload groundwork for admin product media handling
 
 If the next assistant needs the shortest high-value summary before implementation, the biggest current takeaway is:
 - the app now has meaningful authenticated user and admin workflows
@@ -169,10 +171,12 @@ If the next assistant needs the shortest high-value summary before implementatio
 - checkout now has dedicated backend integration coverage for totals, coupon usage, payment simulation outcomes, and stock-handling rules
 - checkout UX is much clearer now, including result states, order follow-up, validation summaries, and add-to-cart popups
 - admins can inspect platform-wide order history with customer and line-item pricing visibility
-- admins can update order fulfillment status and review read-only audit logs for product, category, and order actions
+- admins can update order fulfillment status and review read-only audit logs for product, category, coupon, and order actions
 - admins can now manage categories directly through protected backend and frontend flows
 - authenticated users can now save and remove products from a protected wishlist flow
-- the next strongest follow-up work is likely reviews groundwork or broader user-facing account features
+- admins can now manage coupons, shoppers can use stronger catalog filters, and users can review notification history
+- admin product management now has a local upload-ready media path with file validation and product image persistence
+- the next strongest follow-up work is likely reviews groundwork or deeper user-generated commerce features
 
 ### 1) Role-aware authentication UX is now working
 Implemented:
@@ -576,6 +580,82 @@ Behavior:
 - the account area now surfaces wishlist item count visibility alongside order metrics
 - backend integration test coverage now includes wishlist route protection, validation, and add/remove behavior
 
+### 20) Coupon management, advanced filters, and notification visibility were implemented
+Created:
+- `server/src/routes/coupon.routes.js`
+- `server/src/controllers/coupon.controller.js`
+- `server/src/services/coupon.service.js`
+- `server/src/repositories/coupon.repository.js`
+- `server/src/validators/coupon.validators.js`
+- `server/src/routes/notification.routes.js`
+- `server/src/controllers/notification.controller.js`
+- `server/src/services/notification.service.js`
+- `server/src/repositories/notification.repository.js`
+- `server/src/validators/notification.validators.js`
+- `client/src/features/coupons/api/couponsApi.js`
+- `client/src/features/notifications/api/notificationsApi.js`
+- `client/src/features/admin/validation/couponFormSchema.js`
+- `client/src/features/admin/components/AdminCouponForm.jsx`
+- `client/src/features/admin/components/AdminCouponsTable.jsx`
+- `client/src/pages/AdminCouponsPage.jsx`
+- `client/src/pages/NotificationsPage.jsx`
+- `server/tests/coupon.test.js`
+- `server/tests/notification.test.js`
+
+Updated:
+- `server/src/routes/index.js`
+- `server/src/services/product.service.js`
+- `server/src/repositories/product.repository.js`
+- `server/src/validators/product.validators.js`
+- `server/scripts/run-tests.js`
+- `client/src/services/baseApi.js`
+- `client/src/pages/ProductsPage.jsx`
+- `client/src/router/index.jsx`
+- `client/src/layouts/AdminLayout.jsx`
+- `client/src/layouts/PublicLayout.jsx`
+- `README.md`
+
+Behavior:
+- admins can now manage coupons at `/admin/coupons`
+- the backend now supports protected coupon listing, create, and update flows with validation and audit logging
+- public catalog filters now support price range and stock-state filtering in addition to existing search, category, sort, and pagination
+- authenticated users can now browse notifications at `/notifications`
+- users can mark single notifications or all notifications as read through protected owner-scoped backend flows
+- the public header now surfaces notification visibility directly for authenticated users, including unread count
+- backend integration test coverage now includes coupon route protection and notification route protection/read-state behavior
+
+### 21) Product image upload groundwork was implemented
+Created:
+- `server/src/config/uploads.js`
+- `server/src/middlewares/uploadProductImage.js`
+- `server/src/repositories/productImage.repository.js`
+- `server/src/services/productImage.service.js`
+- `client/src/features/admin/components/AdminProductImageUploadForm.jsx`
+- `server/tests/product-image.test.js`
+
+Updated:
+- `server/package.json`
+- `server/src/config/env.js`
+- `.env.example`
+- `server/src/app.js`
+- `server/src/routes/product.routes.js`
+- `server/src/controllers/product.controller.js`
+- `server/src/validators/product.validators.js`
+- `server/src/routes/index.js`
+- `server/scripts/run-tests.js`
+- `client/src/features/products/api/productsApi.js`
+- `client/src/features/admin/components/AdminProductsTable.jsx`
+- `client/src/pages/AdminProductsPage.jsx`
+- `README.md`
+
+Behavior:
+- admins can now upload product images through a first-step protected workflow inside admin product management
+- uploads now use a local storage abstraction that can be replaced later by a cloud provider without rewriting the whole admin flow
+- server-side file validation now restricts mime type and file size before persistence
+- uploaded product images are persisted into `product_images` and can become the new primary image for a product
+- uploaded media is exposed through the local `/uploads/...` mount so product cards and admin previews can render the new primary image
+- backend integration test coverage now includes product image upload route protection and missing-file validation behavior
+
 ---
 
 ## Current Demo Credentials
@@ -602,11 +682,13 @@ Authenticated:
 - `/account`
 - `/checkout`
 - `/wishlist`
+- `/notifications`
 
 Admin:
 - `/admin/categories`
 - `/admin/products`
 - `/admin/orders`
+- `/admin/coupons`
 - `/admin/audit-logs`
 
 ### Backend routes
@@ -630,6 +712,16 @@ Categories:
 Checkout:
 - `POST /api/checkout` authenticated simulated checkout
 
+Coupons:
+- `GET /api/coupons` admin-only coupon listing
+- `POST /api/coupons` admin-only coupon creation
+- `PATCH /api/coupons/:couponId` admin-only coupon update
+
+Notifications:
+- `GET /api/notifications` authenticated notification listing
+- `PATCH /api/notifications/read-all` authenticated mark-all-read
+- `PATCH /api/notifications/:notificationId/read` authenticated single-notification read update
+
 Wishlist:
 - `GET /api/wishlist` authenticated wishlist listing
 - `POST /api/wishlist` authenticated wishlist add
@@ -650,6 +742,7 @@ Products:
 - `GET /api/products/manage` admin-only
 - `GET /api/products/:productIdOrSlug`
 - `POST /api/products` admin-only
+- `POST /api/products/:productIdOrSlug/images` admin-only product image upload
 - `PATCH /api/products/:productIdOrSlug/stock` admin-only stock adjustment
 - `PATCH /api/products/:productIdOrSlug` admin-only
 - `DELETE /api/products/:productIdOrSlug` admin-only scaffold / soft-delete path
@@ -708,6 +801,13 @@ Do not break these patterns:
 - frontend: feature-based structure, RTK Query for server data
 - validation in validators / schemas, not ad-hoc inside routes/pages
 
+### 6) Product uploads now have local groundwork
+Current state:
+- admin product image uploads now use a local `/uploads/...` static mount on the server
+- image handling uses a local-storage abstraction in `server/src/config/uploads.js` so the storage provider can be swapped later
+- `.env` now matters for upload behavior too, especially `UPLOAD_DIR`, `SERVER_PUBLIC_URL`, and `PRODUCT_IMAGE_MAX_FILE_SIZE_MB`
+- if Docker shows a dependency issue after the new `multer` addition, restart containers first and fall back to `docker compose down -v` if named `node_modules` volumes are stale
+
 ---
 
 ## Recommended Next Task
@@ -715,24 +815,24 @@ The recommended next implementation is:
 
 ### Reviews groundwork
 Reason:
-- wishlist support is now in place, so the next natural user-facing commerce step is product reviews and ratings
-- reviews complement the current product detail, order-history, and future trust-building storefront story
-- the schema already includes `reviews`, which makes this a clean continuation of the current architecture
+- upload-ready media handling is now in place, so the next strong user-facing commerce layer is product reviews and ratings
+- reviews complement wishlist, order history, and product detail pages in a realistic post-purchase flow
+- the schema already includes `reviews`, so this can extend the current architecture cleanly
 
 Recommended scope:
-1. add protected backend review creation and listing flows with purchase-aware business rules if feasible in this phase
-2. expose product-level review data in catalog/detail responses or dedicated review endpoints
-3. add frontend review UI on product detail plus user-facing review submission states
+1. add backend review listing and creation flows with validation
+2. enforce purchase-aware review creation rules if feasible with the current order schema
+3. expose frontend review UI on product detail with loading, empty, error, and success states
 4. keep the implementation modular so moderation or admin review visibility can follow later
 
 ---
 
 ## Suggested Implementation Priorities After That
-With auth/session bootstrap persistence, checkout-focused backend tests, admin order controls, audit-log visibility, admin category management, and wishlist groundwork now in place, the next strong options are:
+With auth/session bootstrap persistence, checkout-focused backend tests, admin order controls, audit-log visibility, admin category management, wishlist groundwork, coupon management, advanced filters, notification visibility, and image upload groundwork now in place, the next strong options are:
 1. reviews groundwork
 2. frontend auth bootstrap route-behavior tests
-3. image upload groundwork
-4. notification center visibility
+3. notification center expansion or admin metrics depth
+4. deeper image-management tooling such as gallery ordering or primary-image switching
 
 ---
 

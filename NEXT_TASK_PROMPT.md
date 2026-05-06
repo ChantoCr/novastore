@@ -4,7 +4,7 @@
 Implement reviews groundwork for authenticated users within the current product and order architecture.
 
 ## Why
-The repository now supports product browsing, cart and checkout simulation, order history, admin catalog management, and wishlist saving. The next strong commerce layer is product reviews so shoppers can leave feedback and future reviewers can see trust signals on product detail pages.
+The repository now supports category management, product management, coupon management, advanced catalog filters, notification visibility, wishlist behavior, and upload-ready product image handling. The next strong commerce layer is product reviews so shoppers can leave feedback and future reviewers can see trust signals on product detail pages.
 
 This task matters because it will:
 - enrich product-detail experience with user-generated feedback
@@ -59,7 +59,7 @@ Do not include yet:
 ## Notes
 Current important context:
 - auth/session bootstrap persistence is implemented
-- checkout flow, order history, category management, and wishlist groundwork are already in place
-- product detail pages now support add-to-cart and wishlist actions
+- category management, wishlist groundwork, advanced filters, coupon management, notification visibility, and image-upload groundwork are already in place
+- product detail pages support add-to-cart and wishlist actions, while admin product management now has a first-step upload-ready media flow
 - the next strong user-facing commerce gap is reviews and ratings
 - read `NEXT_CHAT_INSTRUCTIONS.md` first in the next chat before making changes

@@ -18,16 +18,21 @@ This repository currently includes:
 - Improved checkout result UX with animated status feedback, order summary, and direct order follow-up into account history
 - Admin category management UI for protected catalog taxonomy control
 - Admin product management UI for role-protected catalog editing
+- Admin coupon management UI for protected discount-rule administration
+- Admin product image upload groundwork with local storage abstraction and safe file validation
 - Admin order history view with customer, item-price, and payment visibility
 - Admin order status update controls with backend audit logging
-- Read-only admin audit log screen for product, category, and order administration events
+- Read-only admin audit log screen for product, category, coupon, and order administration events
 - Admin inventory adjustment flow with stock movement tracking
-- Backend audit logging for important admin product, category, and order actions
+- Backend audit logging for important admin product, category, coupon, and order actions
 - React Hook Form + Zod auth forms
 - Add-to-cart toast feedback for catalog and product-detail flows
+- Advanced catalog filters for price range and stock state
 - Authenticated wishlist saving and removal flows
+- Authenticated notifications visibility and read-state management
+- Local product image upload groundwork for admin catalog media handling
 - Frontend tests for auth form validation and product card rendering
-- Backend integration tests for auth, admin product/category protection, wishlist protection, and checkout business rules
+- Backend integration tests for auth, admin product/category/coupon/upload protection, notification protection, wishlist protection, and checkout business rules
 - Starter Docker setup
 - Starter MySQL schema, migration, and seed files
 - ESLint and Prettier configuration
@@ -293,7 +298,10 @@ Expected services:
 - Admin categories route: `http://localhost:5000/api/categories/manage`
 - Products route: `http://localhost:5000/api/products`
 - Admin products route: `http://localhost:5000/api/products/manage`
+- Coupons route: `http://localhost:5000/api/coupons`
+- Notifications route: `http://localhost:5000/api/notifications`
 - Wishlist route: `http://localhost:5000/api/wishlist`
+- Uploads mount: `http://localhost:5000/uploads/...`
 - MySQL: `localhost:3306`
 
 ## Current Scaffolded Modules
@@ -301,11 +309,13 @@ Expected services:
 ### Backend
 - Auth routes: register, login, refresh, logout, me
 - Categories routes: public active listing plus admin managed listing, create, and update flows
-- Product routes: public list, detail, admin managed list, create, update, soft delete, and dedicated stock adjustment
+- Product routes: public list, detail, admin managed list, create, update, soft delete, dedicated stock adjustment, richer public filtering, and admin image upload groundwork
+- Coupon routes: admin-only listing, create, and update flows
+- Notification routes: authenticated listing plus read-state updates
 - Wishlist routes: authenticated saved-item listing, add, and remove flows
 - Checkout route: protected simulated checkout with backend total calculation, coupon validation, payment simulation, order creation, notification creation, and stock reduction on approved payments
 - Order routes: authenticated order history and owner-only order detail access, plus admin-wide order listing, order detail inspection, and admin status updates
-- Audit logging for important admin product, category, and order actions
+- Audit logging for important admin product, category, coupon, and order actions
 - Admin audit-log listing route for protected read-only traceability
 - Validation middleware
 - JWT auth middleware
@@ -317,16 +327,18 @@ Expected services:
 - Auth bootstrap flow that restores valid sessions on app load and guards protected routes until restoration completes
 - Authenticated account page with order history, order detail panel, and wishlist summary visibility
 - Protected wishlist page for saved products
-- Product listing page with live category filters
+- Protected notifications page for account activity visibility
+- Product listing page with live category filters plus price and stock filtering
 - Product detail page with add-to-cart and wishlist actions
 - Cart page with local Redux state and quantity management
 - Protected checkout page with simulated payment form, validation summary, and animated result states
 - Admin categories page for listing, creating, editing, and toggling category visibility
-- Admin product management page with dedicated inventory adjustment flow and low-stock visibility
+- Admin product management page with dedicated inventory adjustment flow, low-stock visibility, and first-step product image uploads
+- Admin coupons page for listing, creating, editing, and toggling coupon availability
 - Admin orders page for viewing customer order history, item prices, totals, payment simulation metadata, and status updates
-- Admin audit logs page for reviewing protected product, category, and order action history
+- Admin audit logs page for reviewing protected product, category, coupon, and order action history
 - RTK Query base API
-- Auth slice with minimal session bootstrap persistence, cart slice with local storage persistence, a lightweight UI slice for toast feedback, categories API slice with public/admin category management, products API slice, wishlist API slice, checkout API slice, orders API slice, and admin audit-log API integration
+- Auth slice with minimal session bootstrap persistence, cart slice with local storage persistence, a lightweight UI slice for toast feedback, categories API slice with public/admin category management, products API slice with upload support, coupons API slice, notifications API slice, wishlist API slice, checkout API slice, orders API slice, and admin audit-log API integration
 - Protected route and role-protected route components
 
 ## Environment Variables
@@ -347,6 +359,9 @@ Important values include:
 - `REFRESH_TOKEN_TTL`
 - `BCRYPT_SALT_ROUNDS`
 - `CORS_ORIGIN`
+- `UPLOAD_DIR`
+- `SERVER_PUBLIC_URL`
+- `PRODUCT_IMAGE_MAX_FILE_SIZE_MB`
 - `VITE_API_URL`
 
 ## Code Quality
@@ -450,6 +465,9 @@ Current coverage includes:
 - backend authenticated `/api/auth/me` behavior
 - backend admin product route protection
 - backend admin category route protection
+- backend admin coupon route protection
+- backend admin product image upload route protection
+- backend notification route protection and owner read-state behavior
 - backend wishlist route protection and duplicate-save handling
 - backend product mutation validation failures
 - backend category mutation validation failures
@@ -461,6 +479,8 @@ Planned next coverage includes:
 - backend admin order status management flows
 - backend admin audit-log access restrictions
 - future frontend wishlist interaction coverage
+- future frontend notification interaction coverage
+- future admin product image upload interaction coverage
 - future checkout form interaction and result-state UI coverage
 
 ## What Makes NOVA Store Different
@@ -479,13 +499,16 @@ Add screenshots here as implementation progresses:
 - Product detail
 - Account page
 - Wishlist page
+- Notifications page
 - Admin categories page
+- Admin coupons page
 - Admin products page
+- Admin product image upload flow
 
 ## Roadmap / Future Improvements
 - Real payment provider integration later
 - Email notification simulation or provider integration
-- Image storage abstraction
+- Cloud storage provider swap later, beyond the new local upload abstraction
 - Advanced analytics dashboards
 - Internationalization
 - Background jobs for notifications and maintenance tasks

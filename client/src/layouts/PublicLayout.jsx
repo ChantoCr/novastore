@@ -4,6 +4,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useLogoutMutation } from '../features/auth/api/authApi.js';
 import { clearCredentials } from '../features/auth/authSlice.js';
 import { selectCartItemCount } from '../features/cart/cartSlice.js';
+import { useGetNotificationsQuery } from '../features/notifications/api/notificationsApi.js';
 import ToastViewport from '../features/ui/components/ToastViewport.jsx';
 
 function PublicLayout() {
@@ -14,12 +15,28 @@ function PublicLayout() {
   const cartItemCount = useSelector(selectCartItemCount);
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const isAuthResolving = authBootstrapStatus !== 'complete';
+  const { data: notificationsResponse } = useGetNotificationsQuery(
+    { page: 1, limit: 1, status: 'all' },
+    {
+      skip: !isAuthenticated || isAuthResolving,
+    },
+  );
+  const unreadNotificationCount = notificationsResponse?.data?.summary?.unreadCount || 0;
 
   const navItems = [
     { label: 'Home', to: '/' },
     { label: 'Products', to: '/products' },
     { label: `Cart${cartItemCount ? ` (${cartItemCount})` : ''}`, to: '/cart' },
-    ...(isAuthenticated ? [{ label: 'Wishlist', to: '/wishlist' }, { label: 'Account', to: '/account' }] : []),
+    ...(isAuthenticated
+      ? [
+          {
+            label: `Notifications${unreadNotificationCount ? ` (${unreadNotificationCount})` : ''}`,
+            to: '/notifications',
+          },
+          { label: 'Wishlist', to: '/wishlist' },
+          { label: 'Account', to: '/account' },
+        ]
+      : []),
     ...(role === 'admin' ? [{ label: 'Admin', to: '/admin/products' }] : []),
     ...(!isAuthenticated && !isAuthResolving
       ? [

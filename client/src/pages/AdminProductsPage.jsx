@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 
 import AdminProductForm from '../features/admin/components/AdminProductForm.jsx';
+import AdminProductImageUploadForm from '../features/admin/components/AdminProductImageUploadForm.jsx';
 import AdminProductsTable from '../features/admin/components/AdminProductsTable.jsx';
 import AdminStockAdjustmentForm from '../features/admin/components/AdminStockAdjustmentForm.jsx';
 import { useGetManagedCategoriesQuery } from '../features/categories/api/categoriesApi.js';
@@ -9,6 +10,7 @@ import {
   useCreateProductMutation,
   useGetManagedProductsQuery,
   useUpdateProductMutation,
+  useUploadProductImageMutation,
 } from '../features/products/api/productsApi.js';
 
 const defaultFilters = {
@@ -40,6 +42,7 @@ function AdminProductsPage() {
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const [adjustProductStock, { isLoading: isAdjustingStock }] = useAdjustProductStockMutation();
+  const [uploadProductImage, { isLoading: isUploadingImage }] = useUploadProductImageMutation();
 
   const products = useMemo(() => data?.data?.items || [], [data]);
   const pagination = data?.data?.pagination;
@@ -132,6 +135,32 @@ function AdminProductsPage() {
     }
   }
 
+  async function handleUploadImage(formData) {
+    if (!selectedProduct) {
+      return;
+    }
+
+    setFeedback(null);
+
+    try {
+      const response = await uploadProductImage({
+        identifier: selectedProduct.slug || selectedProduct.id,
+        formData,
+      }).unwrap();
+
+      setSelectedProduct(response.data.product);
+      setFeedback({
+        type: 'success',
+        message: `Image uploaded for ${response.data.product.name}. Product media metadata and audit logging were recorded.`,
+      });
+    } catch (mutationError) {
+      setFeedback({
+        type: 'error',
+        message: mutationError?.data?.message || 'Could not upload the product image.',
+      });
+    }
+  }
+
   return (
     <section className="space-y-6">
       <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
@@ -175,6 +204,12 @@ function AdminProductsPage() {
         onCancel={() => setSelectedStockProduct(null)}
         onSubmit={handleAdjustStock}
         product={selectedStockProduct}
+      />
+
+      <AdminProductImageUploadForm
+        isSubmitting={isUploadingImage}
+        onSubmit={handleUploadImage}
+        product={selectedProduct}
       />
 
       {feedback ? (

@@ -33,6 +33,9 @@ const envSchema = z.object({
   ACCESS_TOKEN_TTL: z.string().default('15m'),
   REFRESH_TOKEN_TTL: z.string().default('7d'),
   BCRYPT_SALT_ROUNDS: z.coerce.number().int().min(10).max(14).default(12),
+  UPLOAD_DIR: z.string().default('uploads'),
+  SERVER_PUBLIC_URL: z.string().url().default('http://localhost:5000'),
+  PRODUCT_IMAGE_MAX_FILE_SIZE_MB: z.coerce.number().min(1).max(10).default(5),
 });
 
 const parsed = envSchema.safeParse(process.env);

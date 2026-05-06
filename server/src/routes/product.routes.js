@@ -8,9 +8,11 @@ import {
   listManagedProducts,
   listProducts,
   updateProduct,
+  uploadProductImage,
 } from '../controllers/product.controller.js';
 import { authenticateToken } from '../middlewares/authenticateToken.js';
 import { authorizeRoles } from '../middlewares/authorizeRoles.js';
+import { uploadProductImage as uploadProductImageMiddleware } from '../middlewares/uploadProductImage.js';
 import { validateRequest } from '../middlewares/validateRequest.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
@@ -20,6 +22,7 @@ import {
   listProductsQuerySchema,
   productIdentifierSchema,
   updateProductSchema,
+  uploadProductImageSchema,
 } from '../validators/product.validators.js';
 
 const productRouter = Router();
@@ -52,6 +55,15 @@ productRouter.patch(
   authorizeRoles('admin'),
   validateRequest({ params: productIdentifierSchema, body: adjustStockSchema }),
   asyncHandler(adjustProductStock),
+);
+
+productRouter.post(
+  '/:productIdOrSlug/images',
+  authenticateToken,
+  authorizeRoles('admin'),
+  uploadProductImageMiddleware,
+  validateRequest({ params: productIdentifierSchema, body: uploadProductImageSchema }),
+  asyncHandler(uploadProductImage),
 );
 
 productRouter.patch(

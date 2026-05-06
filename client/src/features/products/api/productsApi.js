@@ -69,6 +69,20 @@ export const productsApi = baseApi.injectEndpoints({
         { type: 'ManagedProducts', id: 'LIST' },
       ],
     }),
+    uploadProductImage: builder.mutation({
+      query: ({ identifier, formData }) => ({
+        url: `/products/${identifier}/images`,
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: (_result, _error, { identifier }) => [
+        { type: 'Products', id: identifier },
+        { type: 'Products', id: 'LIST' },
+        { type: 'ManagedProducts', id: identifier },
+        { type: 'ManagedProducts', id: 'LIST' },
+        { type: 'AuditLogs', id: 'LIST' },
+      ],
+    }),
     deleteProduct: builder.mutation({
       query: (identifier) => ({
         url: `/products/${identifier}`,
@@ -90,4 +104,5 @@ export const {
   useGetProductByIdentifierQuery,
   useGetProductsQuery,
   useUpdateProductMutation,
+  useUploadProductImageMutation,
 } = productsApi;

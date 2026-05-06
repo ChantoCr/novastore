@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 
 import { env } from './config/env.js';
+import { uploadConfig } from './config/uploads.js';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js';
 import authRouter from './routes/auth.routes.js';
 import apiRouter from './routes/index.js';
@@ -28,6 +29,14 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(
+  uploadConfig.publicMountPath,
+  express.static(uploadConfig.absoluteUploadDir, {
+    setHeaders: (res) => {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    },
+  }),
+);
 
 app.use('/api/auth', authLimiter, authRouter);
 app.use('/api', apiRouter);

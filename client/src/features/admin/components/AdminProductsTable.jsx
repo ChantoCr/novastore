@@ -33,10 +33,25 @@ function AdminProductsTable({
             {products.map((product) => (
               <tr key={product.id} className="align-top">
                 <td className="px-4 py-4">
-                  <div>
-                    <p className="font-medium text-white">{product.name}</p>
-                    <p className="mt-1 text-xs text-slate-400">{product.slug}</p>
-                    <p className="mt-1 text-xs text-slate-500">SKU: {product.sku}</p>
+                  <div className="flex items-start gap-3">
+                    <div className="h-16 w-16 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/80">
+                      {product.primaryImageUrl ? (
+                        <img
+                          src={product.primaryImageUrl}
+                          alt={product.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-500">
+                          No image
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium text-white">{product.name}</p>
+                      <p className="mt-1 text-xs text-slate-400">{product.slug}</p>
+                      <p className="mt-1 text-xs text-slate-500">SKU: {product.sku}</p>
+                    </div>
                   </div>
                 </td>
                 <td className="px-4 py-4 text-slate-300">{product.categoryName || 'Uncategorized'}</td>

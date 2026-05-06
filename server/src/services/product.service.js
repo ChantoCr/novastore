@@ -40,11 +40,17 @@ export async function getPublicProducts(query) {
       limit,
       search: query.search,
       category: query.category,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
+      stockStatus: query.stockStatus,
       sort: query.sort,
     }),
     countPublicProducts({
       search: query.search,
       category: query.category,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
+      stockStatus: query.stockStatus,
     }),
   ]);
 
@@ -59,6 +65,9 @@ export async function getPublicProducts(query) {
     filters: {
       search: query.search || null,
       category: query.category || null,
+      minPrice: typeof query.minPrice === 'undefined' ? null : query.minPrice,
+      maxPrice: typeof query.maxPrice === 'undefined' ? null : query.maxPrice,
+      stockStatus: query.stockStatus || 'all',
       sort: query.sort || 'newest',
     },
   };
@@ -74,12 +83,18 @@ export async function getManagedProducts(query) {
       limit,
       search: query.search,
       category: query.category,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
+      stockStatus: query.stockStatus,
       sort: query.sort,
       status: query.status,
     }),
     countManagedProducts({
       search: query.search,
       category: query.category,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
+      stockStatus: query.stockStatus,
       status: query.status,
     }),
   ]);
@@ -95,6 +110,9 @@ export async function getManagedProducts(query) {
     filters: {
       search: query.search || null,
       category: query.category || null,
+      minPrice: typeof query.minPrice === 'undefined' ? null : query.minPrice,
+      maxPrice: typeof query.maxPrice === 'undefined' ? null : query.maxPrice,
+      stockStatus: query.stockStatus || 'all',
       sort: query.sort || 'newest',
       status: query.status || 'all',
     },

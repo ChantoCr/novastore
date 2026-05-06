@@ -9,6 +9,9 @@ const defaultFilters = {
   limit: 6,
   search: '',
   category: '',
+  minPrice: '',
+  maxPrice: '',
+  stockStatus: 'all',
   sort: 'newest',
 };
 
@@ -19,6 +22,8 @@ function ProductsPage() {
       ...filters,
       search: filters.search || undefined,
       category: filters.category || undefined,
+      minPrice: filters.minPrice === '' ? undefined : Number(filters.minPrice),
+      maxPrice: filters.maxPrice === '' ? undefined : Number(filters.maxPrice),
     }),
     [filters],
   );
@@ -41,7 +46,7 @@ function ProductsPage() {
           </p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <label className="text-sm text-slate-200">
             Search
             <input
@@ -74,6 +79,52 @@ function ProductsPage() {
           </label>
 
           <label className="text-sm text-slate-200">
+            Min price
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={filters.minPrice}
+              onChange={(event) =>
+                setFilters((current) => ({ ...current, page: 1, minPrice: event.target.value }))
+              }
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white"
+              placeholder="0"
+            />
+          </label>
+
+          <label className="text-sm text-slate-200">
+            Max price
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={filters.maxPrice}
+              onChange={(event) =>
+                setFilters((current) => ({ ...current, page: 1, maxPrice: event.target.value }))
+              }
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white"
+              placeholder="500"
+            />
+          </label>
+
+          <label className="text-sm text-slate-200">
+            Stock
+            <select
+              value={filters.stockStatus}
+              onChange={(event) =>
+                setFilters((current) => ({ ...current, page: 1, stockStatus: event.target.value }))
+              }
+              className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white"
+            >
+              <option value="all">All stock levels</option>
+              <option value="in_stock">In stock</option>
+              <option value="low_stock">Low stock</option>
+              <option value="out_of_stock">Out of stock</option>
+            </select>
+          </label>
+
+          <label className="text-sm text-slate-200">
             Sort
             <select
               value={filters.sort}
@@ -90,6 +141,16 @@ function ProductsPage() {
               <option value="name_desc">Name: Z-A</option>
             </select>
           </label>
+
+          <div className="flex items-end">
+            <button
+              type="button"
+              onClick={() => setFilters(defaultFilters)}
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 transition hover:border-violet-400/30"
+            >
+              Clear filters
+            </button>
+          </div>
         </div>
       </div>
 

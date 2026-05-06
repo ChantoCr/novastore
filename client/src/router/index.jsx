@@ -7,12 +7,14 @@ import PublicLayout from '../layouts/PublicLayout.jsx';
 import AccountPage from '../pages/AccountPage.jsx';
 import AdminAuditLogsPage from '../pages/AdminAuditLogsPage.jsx';
 import AdminCategoriesPage from '../pages/AdminCategoriesPage.jsx';
+import AdminCouponsPage from '../pages/AdminCouponsPage.jsx';
 import AdminOrdersPage from '../pages/AdminOrdersPage.jsx';
 import AdminProductsPage from '../pages/AdminProductsPage.jsx';
 import CartPage from '../pages/CartPage.jsx';
 import CheckoutPage from '../pages/CheckoutPage.jsx';
 import HomePage from '../pages/HomePage.jsx';
 import LoginPage from '../pages/LoginPage.jsx';
+import NotificationsPage from '../pages/NotificationsPage.jsx';
 import ProductDetailPage from '../pages/ProductDetailPage.jsx';
 import ProductsPage from '../pages/ProductsPage.jsx';
 import RegisterPage from '../pages/RegisterPage.jsx';
@@ -71,6 +73,14 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: 'notifications',
+        element: (
+          <ProtectedRoute>
+            <NotificationsPage />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
   {
@@ -92,6 +102,10 @@ export const router = createBrowserRouter([
       {
         path: 'orders',
         element: <AdminOrdersPage />,
+      },
+      {
+        path: 'coupons',
+        element: <AdminCouponsPage />,
       },
       {
         path: 'audit-logs',

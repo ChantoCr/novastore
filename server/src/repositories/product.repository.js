@@ -21,7 +21,15 @@ function mapProductRow(row) {
   };
 }
 
-function buildCatalogFilters({ search, category, includeInactive = false, status = 'all' }) {
+function buildCatalogFilters({
+  search,
+  category,
+  minPrice,
+  maxPrice,
+  stockStatus = 'all',
+  includeInactive = false,
+  status = 'all',
+}) {
   const whereClauses = ['p.deleted_at IS NULL'];
   const params = [];
 
@@ -41,6 +49,24 @@ function buildCatalogFilters({ search, category, includeInactive = false, status
   if (category) {
     whereClauses.push('(c.slug = ? OR c.name = ?)');
     params.push(category, category);
+  }
+
+  if (typeof minPrice !== 'undefined') {
+    whereClauses.push('p.price >= ?');
+    params.push(minPrice);
+  }
+
+  if (typeof maxPrice !== 'undefined') {
+    whereClauses.push('p.price <= ?');
+    params.push(maxPrice);
+  }
+
+  if (stockStatus === 'in_stock') {
+    whereClauses.push('p.stock > 0');
+  } else if (stockStatus === 'low_stock') {
+    whereClauses.push('p.stock > 0 AND p.stock <= p.low_stock_threshold');
+  } else if (stockStatus === 'out_of_stock') {
+    whereClauses.push('p.stock = 0');
   }
 
   return {
@@ -85,8 +111,14 @@ const productSelect = `
   LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_primary = 1
 `;
 
-export async function listPublicProducts({ page, limit, search, category, sort }) {
-  const { whereSql, params } = buildCatalogFilters({ search, category });
+export async function listPublicProducts({ page, limit, search, category, minPrice, maxPrice, stockStatus, sort }) {
+  const { whereSql, params } = buildCatalogFilters({
+    search,
+    category,
+    minPrice,
+    maxPrice,
+    stockStatus,
+  });
   const offset = (page - 1) * limit;
   const orderClause = getOrderClause(sort);
 
@@ -101,8 +133,14 @@ export async function listPublicProducts({ page, limit, search, category, sort }
   return rows.map(mapProductRow);
 }
 
-export async function countPublicProducts({ search, category }) {
-  const { whereSql, params } = buildCatalogFilters({ search, category });
+export async function countPublicProducts({ search, category, minPrice, maxPrice, stockStatus }) {
+  const { whereSql, params } = buildCatalogFilters({
+    search,
+    category,
+    minPrice,
+    maxPrice,
+    stockStatus,
+  });
 
   const [rows] = await dbPool.query(
     `
@@ -117,10 +155,23 @@ export async function countPublicProducts({ search, category }) {
   return Number(rows[0]?.total || 0);
 }
 
-export async function listManagedProducts({ page, limit, search, category, sort, status }) {
+export async function listManagedProducts({
+  page,
+  limit,
+  search,
+  category,
+  minPrice,
+  maxPrice,
+  stockStatus,
+  sort,
+  status,
+}) {
   const { whereSql, params } = buildCatalogFilters({
     search,
     category,
+    minPrice,
+    maxPrice,
+    stockStatus,
     includeInactive: true,
     status,
   });
@@ -138,10 +189,13 @@ export async function listManagedProducts({ page, limit, search, category, sort,
   return rows.map(mapProductRow);
 }
 
-export async function countManagedProducts({ search, category, status }) {
+export async function countManagedProducts({ search, category, minPrice, maxPrice, stockStatus, status }) {
   const { whereSql, params } = buildCatalogFilters({
     search,
     category,
+    minPrice,
+    maxPrice,
+    stockStatus,
     includeInactive: true,
     status,
   });

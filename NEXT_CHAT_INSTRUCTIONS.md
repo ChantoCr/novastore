@@ -42,15 +42,20 @@ Before implementing new features, check whether the current need is:
   - auth/session bootstrap persistence across refreshes
   - products and categories
   - cart and checkout simulation with clearer result UX and add-to-cart toast feedback
-  - authenticated order history, wishlist visibility, and a protected wishlist page
+  - authenticated order history, wishlist visibility, a protected wishlist page, and notifications visibility
   - admin category management
-  - admin product management UI
+  - admin product management UI with local image-upload groundwork
+  - admin coupon management UI
   - admin stock adjustment flow
   - admin order history, order status updates, and read-only audit-log visibility
   - checkout-focused backend integration tests
+  - stronger public catalog filtering by price and stock state
+  - authenticated notification visibility and read-state updates
 - Demo credentials are documented in `README.md` and `CHAT_CONTEXT_HANDOFF.md`.
 - Docker is working now and should be treated as the default local run path unless the user asks for manual MySQL help.
 - If a Docker-only dependency import error appears, check stale named `node_modules` volumes first, then restart containers or use `docker compose down -v`.
+- This is especially relevant now after the new server-side upload dependency (`multer`) and local upload groundwork.
 - For manual local MySQL runs, verify whether `.env` uses `DB_HOST=localhost`.
 - The current next implementation target is reviews groundwork, and the latest details are in `CHAT_CONTEXT_HANDOFF.md` and `NEXT_TASK_PROMPT.md`.
+- Upload-related runtime context now also depends on `.env` values such as `UPLOAD_DIR`, `SERVER_PUBLIC_URL`, and `PRODUCT_IMAGE_MAX_FILE_SIZE_MB`.
 - Do not skip the required `.md` files above; they now contain the latest phase progression and handoff details needed to continue correctly.

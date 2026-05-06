@@ -8,6 +8,7 @@ import {
   getPublicProducts,
   updateProductRecord,
 } from '../services/product.service.js';
+import { uploadProductImageForAdmin } from '../services/productImage.service.js';
 
 function buildActorContext(req) {
   return {
@@ -86,6 +87,24 @@ export async function adjustProductStock(req, res) {
   res.status(200).json(
     successResponse({
       message: 'Product stock adjusted successfully',
+      data,
+    }),
+  );
+}
+
+export async function uploadProductImage(req, res) {
+  const data = await uploadProductImageForAdmin(
+    req.params.productIdOrSlug,
+    {
+      ...req.body,
+      file: req.file,
+    },
+    buildActorContext(req),
+  );
+
+  res.status(201).json(
+    successResponse({
+      message: 'Product image uploaded successfully',
       data,
     }),
   );
